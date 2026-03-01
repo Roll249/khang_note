@@ -1,0 +1,510 @@
+<!doctype html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Foundations04 - Hadamard Gate</title>
+  <style>
+    :root {
+      --bg: #f5f7fb;
+      --card: #ffffff;
+      --line: #dbe2f0;
+      --text: #2d3a4a;
+      --muted: #7f8ea3;
+      --gate: #4a5568;
+      --gate-text: #fff;
+      --output: #6f94e0;
+      --btn-a: #6f9ff8;
+      --btn-b: #4ed29f;
+      --shadow: 0 8px 20px rgba(30, 50, 90, 0.16);
+      --radius: 12px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Inter, "Segoe UI", Roboto, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      padding: 28px;
+    }
+
+    .wrap {
+      max-width: 960px;
+      margin: 0 auto;
+      display: grid;
+      gap: 18px;
+    }
+
+    .banks {
+      display: flex;
+      gap: 14px;
+      align-items: center;
+    }
+
+    .gate {
+      width: 62px;
+      height: 62px;
+      border-radius: 8px;
+      background: var(--gate);
+      color: var(--gate-text);
+      font-size: 42px;
+      font-weight: 700;
+      display: grid;
+      place-items: center;
+      box-shadow: var(--shadow);
+      cursor: grab;
+      user-select: none;
+      border: 0;
+    }
+
+    .gate.small {
+      width: 56px;
+      height: 56px;
+      font-size: 38px;
+    }
+
+    .toolbar {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      display: inline-flex;
+      overflow: hidden;
+      align-items: stretch;
+      width: fit-content;
+      box-shadow: var(--shadow);
+    }
+
+    .tool {
+      width: 74px;
+      height: 54px;
+      border-right: 1px solid var(--line);
+      display: grid;
+      place-items: center;
+      color: var(--muted);
+      background: #fff;
+      font-weight: 700;
+      font-size: 21px;
+      user-select: none;
+    }
+
+    .tool:last-child {
+      border-right: 0;
+    }
+
+    .tool.dim {
+      opacity: 0.4;
+    }
+
+    .panel {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      overflow-x: auto;
+      box-shadow: var(--shadow);
+    }
+
+    .grid {
+      min-width: 760px;
+      display: grid;
+      grid-template-columns: 80px 130px repeat(4, 1fr) 120px;
+      grid-auto-rows: 72px;
+      align-items: center;
+      position: relative;
+    }
+
+    .wire {
+      position: absolute;
+      left: 212px;
+      right: 132px;
+      top: 108px;
+      height: 2px;
+      background: #6d7f9f;
+      z-index: 0;
+    }
+
+    .cell {
+      border-right: 1px solid #edf1f7;
+      border-bottom: 1px solid #edf1f7;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #9aa7bb;
+      font-size: 31px;
+      font-weight: 700;
+      background: #fff;
+      z-index: 1;
+    }
+
+    .cell.header {
+      font-size: 30px;
+      color: #bac5d5;
+      font-weight: 600;
+    }
+
+    .cell.index {
+      font-size: 26px;
+      color: #a3afc1;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .cell.label {
+      justify-content: flex-start;
+      padding-left: 22px;
+      font-size: 31px;
+      letter-spacing: 0.5px;
+    }
+
+    .cell.output {
+      color: #fff;
+      font-size: 50px;
+      background: var(--output);
+      border-radius: 8px;
+      width: 64px;
+      height: 64px;
+      margin: 0 auto;
+      border: 0;
+      display: grid;
+      place-items: center;
+    }
+
+    .slot {
+      width: 74px;
+      height: 74px;
+      border-radius: 10px;
+      border: 2px dashed transparent;
+      display: grid;
+      place-items: center;
+      background: transparent;
+      z-index: 2;
+    }
+
+    .slot.drag-over {
+      border-color: #9cb4e6;
+      background: #f0f5ff;
+    }
+
+    .actions {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    button {
+      border: 0;
+      color: #fff;
+      font-size: 34px;
+      font-weight: 600;
+      border-radius: 999px;
+      padding: 14px 36px;
+      background: linear-gradient(90deg, var(--btn-a), var(--btn-b));
+      box-shadow: var(--shadow);
+      cursor: pointer;
+    }
+
+    .status {
+      color: #6c7b90;
+      font-size: 21px;
+      font-weight: 600;
+    }
+
+    .log-wrap {
+      background: #f0f2f6;
+      border-radius: var(--radius);
+      border: 1px solid #d9dfeb;
+      min-height: 220px;
+      max-height: 290px;
+      overflow: auto;
+      padding: 16px 18px 20px;
+      display: grid;
+      gap: 14px;
+    }
+
+    .log-title {
+      margin: 4px 0 0;
+      font-size: 40px;
+      font-weight: 800;
+      color: #2f3947;
+    }
+
+    .log {
+      font-size: 44px;
+      line-height: 1.2;
+      font-weight: 700;
+      color: #555b66;
+      letter-spacing: 0.3px;
+      white-space: pre-line;
+    }
+
+    .reset-row {
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    .ghost-btn {
+      border: 0;
+      padding: 10px 24px;
+      font-size: 34px;
+      border-radius: 999px;
+      background: #e9edf4;
+      color: #a2adbd;
+      box-shadow: none;
+      cursor: pointer;
+    }
+
+    @media (max-width: 860px) {
+      body {
+        padding: 16px;
+      }
+
+      .log-title {
+        font-size: 31px;
+      }
+
+      .log {
+        font-size: 30px;
+      }
+
+      button,
+      .ghost-btn {
+        font-size: 24px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <div class="banks" aria-label="Kho cổng lượng tử">
+      <div class="gate" data-bank="H" draggable="true" title="Kéo để thêm cổng H">H</div>
+      <div class="gate" data-bank="X" draggable="true" title="Kéo để thêm cổng X">X</div>
+    </div>
+
+    <div class="toolbar" aria-label="Thanh công cụ">
+      <div class="tool">🔒</div>
+      <div class="tool">↺</div>
+      <div class="tool dim">↻</div>
+      <div class="tool dim">C</div>
+      <div class="tool dim">S</div>
+    </div>
+
+    <div class="panel">
+      <div class="grid">
+        <div class="wire"></div>
+
+        <div class="cell header">↘</div>
+        <div class="cell header"></div>
+        <div class="cell header">1</div>
+        <div class="cell header">2</div>
+        <div class="cell header">3</div>
+        <div class="cell header">4</div>
+        <div class="cell header"></div>
+
+        <div class="cell index" id="input-cell" title="Bấm để đổi đầu vào">0</div>
+        <div class="cell label">Số 1</div>
+
+        <div class="cell"><div class="slot" data-slot="0"></div></div>
+        <div class="cell"><div class="slot" data-slot="1"></div></div>
+        <div class="cell"><div class="slot" data-slot="2"></div></div>
+        <div class="cell"><div class="slot" data-slot="3"></div></div>
+
+        <div class="cell">
+          <div class="cell output" id="output-cell">?</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button id="measure-btn">Đo lường</button>
+      <div class="status" id="status">Kéo cổng H/X vào mạch. H cho kết quả ngẫu nhiên khi đo.</div>
+    </div>
+
+    <h2 class="log-title">Sổ đo của tôi</h2>
+    <div class="log-wrap">
+      <div class="log" id="log"></div>
+      <div class="reset-row">
+        <button class="ghost-btn" id="reset-log-btn">Cài lại</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const sqrtHalf = Math.SQRT1_2;
+    const slots = [...document.querySelectorAll('.slot')];
+    const bankGates = [...document.querySelectorAll('[data-bank]')];
+    const inputCell = document.getElementById('input-cell');
+    const outputCell = document.getElementById('output-cell');
+    const logBox = document.getElementById('log');
+    const measureBtn = document.getElementById('measure-btn');
+    const resetLogBtn = document.getElementById('reset-log-btn');
+    const statusText = document.getElementById('status');
+
+    const state = {
+      input: 0,
+      timeline: [null, null, null, null],
+      measurements: []
+    };
+
+    function createGate(type) {
+      const gate = document.createElement('div');
+      gate.className = 'gate small';
+      gate.dataset.type = type;
+      gate.draggable = true;
+      gate.textContent = type;
+
+      gate.addEventListener('dragstart', (event) => {
+        const fromSlot = gate.parentElement?.dataset.slot;
+        event.dataTransfer.setData('application/json', JSON.stringify({ type, fromSlot }));
+      });
+
+      gate.addEventListener('dblclick', () => {
+        const parentSlot = gate.parentElement;
+        if (!parentSlot || parentSlot.dataset.slot === undefined) return;
+        const index = Number(parentSlot.dataset.slot);
+        state.timeline[index] = null;
+        parentSlot.innerHTML = '';
+        renderPreview();
+      });
+
+      return gate;
+    }
+
+    function applyGateToAmplitudes(a0, a1, gateType) {
+      if (gateType === 'X') {
+        return [a1, a0];
+      }
+      if (gateType === 'H') {
+        return [(a0 + a1) * sqrtHalf, (a0 - a1) * sqrtHalf];
+      }
+      return [a0, a1];
+    }
+
+    function calculateState() {
+      let a0 = state.input === 0 ? 1 : 0;
+      let a1 = state.input === 1 ? 1 : 0;
+
+      for (const gateType of state.timeline) {
+        [a0, a1] = applyGateToAmplitudes(a0, a1, gateType);
+      }
+
+      const p0 = a0 * a0;
+      const p1 = a1 * a1;
+      return { p0, p1 };
+    }
+
+    function renderPreview() {
+      const { p0, p1 } = calculateState();
+      const eps = 1e-10;
+
+      if (Math.abs(p0 - 1) < eps) {
+        outputCell.textContent = '0';
+        statusText.textContent = 'Mạch hiện tại cho đầu ra chắc chắn là 0.';
+        return;
+      }
+      if (Math.abs(p1 - 1) < eps) {
+        outputCell.textContent = '1';
+        statusText.textContent = 'Mạch hiện tại cho đầu ra chắc chắn là 1.';
+        return;
+      }
+
+      outputCell.textContent = '?';
+      statusText.textContent = `Mạch hiện tại đo ngẫu nhiên: P(0)=${p0.toFixed(2)}, P(1)=${p1.toFixed(2)}.`;
+    }
+
+    function renderLog() {
+      if (!state.measurements.length) {
+        logBox.textContent = 'Chưa có kết quả đo.';
+        return;
+      }
+
+      logBox.textContent = state.measurements
+        .slice()
+        .reverse()
+        .map((m) => `Đầu vào: ${m.input}; Đầu ra: ${m.output}`)
+        .join('\n');
+    }
+
+    function clearDragHighlight() {
+      slots.forEach((slot) => slot.classList.remove('drag-over'));
+    }
+
+    bankGates.forEach((bank) => {
+      bank.addEventListener('dragstart', (event) => {
+        const type = event.currentTarget.dataset.bank;
+        event.dataTransfer.setData('application/json', JSON.stringify({ type, fromSlot: null }));
+      });
+    });
+
+    slots.forEach((slot) => {
+      slot.addEventListener('dragover', (event) => {
+        event.preventDefault();
+        slot.classList.add('drag-over');
+      });
+
+      slot.addEventListener('dragleave', () => {
+        slot.classList.remove('drag-over');
+      });
+
+      slot.addEventListener('drop', (event) => {
+        event.preventDefault();
+        clearDragHighlight();
+
+        let payload;
+        try {
+          payload = JSON.parse(event.dataTransfer.getData('application/json'));
+        } catch {
+          return;
+        }
+
+        const target = Number(slot.dataset.slot);
+        const { type, fromSlot } = payload;
+
+        if (!type) return;
+
+        if (fromSlot !== null && fromSlot !== undefined && fromSlot !== '') {
+          const oldIndex = Number(fromSlot);
+          if (oldIndex === target) return;
+          state.timeline[oldIndex] = null;
+          slots[oldIndex].innerHTML = '';
+        }
+
+        state.timeline[target] = type;
+        slot.innerHTML = '';
+        slot.appendChild(createGate(type));
+        renderPreview();
+      });
+    });
+
+    inputCell.addEventListener('click', () => {
+      state.input = state.input ? 0 : 1;
+      inputCell.textContent = String(state.input);
+      renderPreview();
+    });
+
+    measureBtn.addEventListener('click', () => {
+      const { p1 } = calculateState();
+      const output = Math.random() < p1 ? 1 : 0;
+      outputCell.textContent = String(output);
+      state.measurements.push({ input: state.input, output });
+      renderLog();
+    });
+
+    resetLogBtn.addEventListener('click', () => {
+      state.measurements = [];
+      renderLog();
+      renderPreview();
+    });
+
+    renderPreview();
+    renderLog();
+  </script>
+</body>
+
+</html>

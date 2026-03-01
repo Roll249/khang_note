@@ -451,8 +451,34 @@ và thực hiện một phép đo mỗi lần.
 
 ![assets/gif/x-gate.gif](https://www.iqmacademy.com/curriculum/assets/gif/x-gate.gif)    
 
-- Mỗi dòng đại diện cho một qubit. 
+###### Gợi ý
+
+- Mỗi dòng đại diện cho một qubit. Thay đổi giá trị đầu vào bằng cách nhấp vào các số ở đầu mỗi dòng.
 - Các vị trí khác nhau (1, 2, 3, 4) mà cổng có thể được đặt biểu thị các bước thời gian khác nhau mà máy tính lượng tử có thể thực hiện một phép toán.
+- Thực hiện phép đo bằng cách nhấp vào _nút Đo_ .
+- Sử dụng thao tác kéo và thả để di chuyển, thêm hoặc xóa các cổng lượng tử.
+
+[Thử nghiệm ở link này](https://roll249.github.io/khang_note/quantum-circuit.html)
+
 
 XCổng này hoạt động rất giống với cổng NOT trong máy tính cổ điển. Thậm chí đôi khi nó còn được gọi là cổng NOT lượng tử.
+
+# Đưa lượng tử vào cuộc thảo luận - Cổng Hadamad
+
+Cổng X hoạt động rất giống với cổng NOT của máy tính cổ điển. Trên thực tế đôi khi nó còn được gọi là cổng NOT lượng tử. Cho đến hiện tại khi bạn đọc tài liệu này, nó không khác nhiều so với máy tính cổ điển. Vậy điều gì thực sự làm cho máy tính lượng tử trở nên khác biệt?
+
+## Khám phá cổng Hadamard H
+
+Qubit có một số đặc tính mà bit không có. Để nghiên cứu điều này chi tiết hơn, chúng ta sẽ khám phá cổng H. nó cho chúng ta cái nhìn đầu tiên về những gì làm cho máy tính lượng tử trở nên đặc biejet. Và để thực sự thấy được điều này, chúng ta cần thực hiện nhiều phép đo.
+
+> !  Khám phá tác dụng của cổng Hadamard. HKiểm tra trạng thái của qubit bằng cách thử các giá trị đầu vào khác nhau và thực hiện ít nhất **10 phép đo** cho mỗi giá trị đầu vào. Sau đó, làm tương tự nhưng với...X kiểm tra và so sánh kết quả.
+
+###### Gợi ý
+
+- Mỗi dòng đại diện cho một qubit. Thay đổi giá trị đầu vào bằng cách nhấp vào các số ở đầu mỗi dòng.
+- Thực hiện phép đo bằng cách nhấp vào _nút Đo_ .
+- Sử dụng thao tác kéo và thả để di chuyển, thêm hoặc xóa các cổng lượng tử.
+  
+[Thử nghiệm ngay ở đây]()
+
 
