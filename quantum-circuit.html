@@ -1,0 +1,443 @@
+<!doctype html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mô phỏng mạch lượng tử kéo thả</title>
+    <style>
+        :root {
+            --bg: #f5f7fb;
+            --card: #ffffff;
+            --line: #dbe2f0;
+            --text: #2d3a4a;
+            --muted: #7f8ea3;
+            --gate: #4a5568;
+            --gate-text: #fff;
+            --output: #5f89df;
+            --btn-a: #6f9ff8;
+            --btn-b: #4ed29f;
+            --shadow: 0 8px 20px rgba(30, 50, 90, 0.16);
+            --radius: 12px;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Inter, "Segoe UI", Roboto, Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            padding: 32px;
+        }
+
+        .wrap {
+            max-width: 900px;
+            margin: 0 auto;
+            display: grid;
+            gap: 20px;
+        }
+
+        .title {
+            font-size: 20px;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .toolbar {
+            background: var(--card);
+            border: 1px solid var(--line);
+            border-radius: var(--radius);
+            display: inline-flex;
+            overflow: hidden;
+            align-items: stretch;
+            box-shadow: var(--shadow);
+            width: fit-content;
+        }
+
+        .tool {
+            width: 74px;
+            height: 60px;
+            border-right: 1px solid var(--line);
+            display: grid;
+            place-items: center;
+            color: var(--muted);
+            background: #fff;
+            font-weight: 700;
+            font-size: 28px;
+            user-select: none;
+        }
+
+        .tool:last-child {
+            border-right: 0;
+        }
+
+        .tool.small {
+            font-size: 20px;
+        }
+
+        .tool.dim {
+            opacity: 0.4;
+        }
+
+        .gate {
+            width: 62px;
+            height: 62px;
+            border-radius: 8px;
+            background: var(--gate);
+            color: var(--gate-text);
+            font-size: 46px;
+            font-weight: 700;
+            display: grid;
+            place-items: center;
+            box-shadow: var(--shadow);
+            cursor: grab;
+            user-select: none;
+        }
+
+        .gate.small {
+            width: 58px;
+            height: 58px;
+            font-size: 40px;
+        }
+
+        .gate[data-type="C"],
+        .gate[data-type="S"] {
+            font-size: 34px;
+        }
+
+        .panel {
+            background: var(--card);
+            border: 1px solid var(--line);
+            border-radius: var(--radius);
+            overflow-x: auto;
+            box-shadow: var(--shadow);
+        }
+
+        .grid {
+            min-width: 730px;
+            display: grid;
+            grid-template-columns: 80px 130px repeat(4, 1fr) 120px;
+            grid-auto-rows: 72px;
+            align-items: center;
+            position: relative;
+        }
+
+        .cell {
+            border-right: 1px solid #edf1f7;
+            border-bottom: 1px solid #edf1f7;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #9aa7bb;
+            font-size: 31px;
+            font-weight: 700;
+            background: #fff;
+            z-index: 1;
+        }
+
+        .cell.header {
+            font-size: 30px;
+            color: #bac5d5;
+            font-weight: 600;
+        }
+
+        .cell.index {
+            font-size: 26px;
+            color: #a3afc1;
+            font-weight: 700;
+        }
+
+        .cell.label {
+            justify-content: flex-start;
+            padding-left: 22px;
+            font-size: 32px;
+            letter-spacing: 0.5px;
+        }
+
+        .cell.output {
+            color: #fff;
+            font-size: 56px;
+            background: var(--output);
+            border-radius: 8px;
+            width: 64px;
+            height: 64px;
+            margin: 0 auto;
+            border: 0;
+        }
+
+        .wire {
+            position: absolute;
+            left: 212px;
+            right: 132px;
+            top: 108px;
+            height: 2px;
+            background: #6d7f9f;
+            z-index: 0;
+        }
+
+        .slot {
+            width: 74px;
+            height: 74px;
+            border-radius: 10px;
+            border: 2px dashed transparent;
+            display: grid;
+            place-items: center;
+            background: transparent;
+            z-index: 2;
+        }
+
+        .slot.drag-over {
+            border-color: #9cb4e6;
+            background: #f0f5ff;
+        }
+
+        .actions {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        button {
+            border: 0;
+            color: #fff;
+            font-size: 36px;
+            font-weight: 600;
+            border-radius: 999px;
+            padding: 14px 38px;
+            background: linear-gradient(90deg, var(--btn-a), var(--btn-b));
+            box-shadow: var(--shadow);
+            cursor: pointer;
+        }
+
+        .status {
+            color: #6c7b90;
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        .log-title {
+            margin: 18px 0 8px;
+            font-size: 46px;
+            font-weight: 800;
+            color: #2f3947;
+        }
+
+        .log {
+            background: #f0f2f6;
+            border-radius: var(--radius);
+            border: 1px solid #d9dfeb;
+            min-height: 220px;
+            max-height: 280px;
+            overflow: auto;
+            padding: 20px;
+            font-size: 54px;
+            line-height: 1.22;
+            font-weight: 700;
+            color: #555b66;
+            letter-spacing: 0.3px;
+            white-space: pre-line;
+        }
+
+        @media (max-width: 860px) {
+            body {
+                padding: 16px;
+            }
+
+            .log-title {
+                font-size: 34px;
+            }
+
+            .log {
+                font-size: 34px;
+            }
+
+            button {
+                font-size: 28px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="wrap">
+        <div class="gate" id="gate-bank" data-type="X" draggable="true" title="Kéo để thêm cổng X">X</div>
+
+        <div class="toolbar" aria-label="Thanh công cụ">
+            <div class="tool small">🔒</div>
+            <div class="tool small">↺</div>
+            <div class="tool small dim">↻</div>
+            <div class="tool small dim">C</div>
+            <div class="tool small dim">S</div>
+        </div>
+
+        <div class="panel">
+            <div class="grid">
+                <div class="wire"></div>
+
+                <div class="cell header">↘</div>
+                <div class="cell header"></div>
+                <div class="cell header">1</div>
+                <div class="cell header">2</div>
+                <div class="cell header">3</div>
+                <div class="cell header">4</div>
+                <div class="cell header"></div>
+
+                <div class="cell index" id="input-cell" role="button" title="Bấm để đổi đầu vào">0</div>
+                <div class="cell label">Số 1</div>
+
+                <div class="cell">
+                    <div class="slot" data-slot="0"></div>
+                </div>
+                <div class="cell">
+                    <div class="slot" data-slot="1"></div>
+                </div>
+                <div class="cell">
+                    <div class="slot" data-slot="2"></div>
+                </div>
+                <div class="cell">
+                    <div class="slot" data-slot="3"></div>
+                </div>
+
+                <div class="cell">
+                    <div class="cell output" id="output-cell">0</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="actions">
+            <button id="measure-btn">Đo lường</button>
+            <div class="status">Kéo thả cổng <strong>X</strong> vào các ô, rồi bấm đo.</div>
+        </div>
+
+        <h2 class="log-title">Sổ đo của tôi</h2>
+        <div class="log" id="log"></div>
+    </div>
+
+    <script>
+        const slots = [...document.querySelectorAll('.slot')];
+        const gateBank = document.getElementById('gate-bank');
+        const inputCell = document.getElementById('input-cell');
+        const outputCell = document.getElementById('output-cell');
+        const logBox = document.getElementById('log');
+        const measureBtn = document.getElementById('measure-btn');
+
+        const state = {
+            input: 0,
+            timeline: [null, null, null, null],
+            measurements: []
+        };
+
+        function createGate(type) {
+            const gate = document.createElement('div');
+            gate.className = 'gate small';
+            gate.dataset.type = type;
+            gate.draggable = true;
+            gate.textContent = type;
+
+            gate.addEventListener('dragstart', (event) => {
+                const fromSlot = gate.parentElement?.dataset.slot;
+                event.dataTransfer.setData('application/json', JSON.stringify({ type, fromSlot }));
+            });
+
+            gate.addEventListener('dblclick', () => {
+                const parentSlot = gate.parentElement;
+                if (!parentSlot || parentSlot.dataset.slot === undefined) return;
+                const index = Number(parentSlot.dataset.slot);
+                state.timeline[index] = null;
+                parentSlot.innerHTML = '';
+                renderOutputPreview();
+            });
+
+            return gate;
+        }
+
+        function renderOutputPreview() {
+            let value = state.input;
+            for (const gateType of state.timeline) {
+                if (gateType === 'X') value = value ? 0 : 1;
+            }
+            outputCell.textContent = String(value);
+        }
+
+        function renderLog() {
+            if (!state.measurements.length) {
+                logBox.textContent = 'Chưa có kết quả đo.';
+                return;
+            }
+            logBox.textContent = state.measurements
+                .slice()
+                .reverse()
+                .map((m) => `Đầu vào: ${m.input}; Đầu ra: ${m.output}`)
+                .join('\n');
+        }
+
+        function clearDragHighlight() {
+            slots.forEach((slot) => slot.classList.remove('drag-over'));
+        }
+
+        gateBank.addEventListener('dragstart', (event) => {
+            event.dataTransfer.setData('application/json', JSON.stringify({ type: 'X', fromSlot: null }));
+        });
+
+        slots.forEach((slot) => {
+            slot.addEventListener('dragover', (event) => {
+                event.preventDefault();
+                slot.classList.add('drag-over');
+            });
+
+            slot.addEventListener('dragleave', () => {
+                slot.classList.remove('drag-over');
+            });
+
+            slot.addEventListener('drop', (event) => {
+                event.preventDefault();
+                clearDragHighlight();
+
+                let payload;
+                try {
+                    payload = JSON.parse(event.dataTransfer.getData('application/json'));
+                } catch {
+                    return;
+                }
+
+                const target = Number(slot.dataset.slot);
+                const { type, fromSlot } = payload;
+
+                if (!type) return;
+
+                if (fromSlot !== null && fromSlot !== undefined && fromSlot !== '') {
+                    const oldIndex = Number(fromSlot);
+                    if (oldIndex === target) return;
+                    state.timeline[oldIndex] = null;
+                    slots[oldIndex].innerHTML = '';
+                }
+
+                state.timeline[target] = type;
+                slot.innerHTML = '';
+                slot.appendChild(createGate(type));
+                renderOutputPreview();
+            });
+        });
+
+        inputCell.addEventListener('click', () => {
+            state.input = state.input ? 0 : 1;
+            inputCell.textContent = String(state.input);
+            renderOutputPreview();
+        });
+
+        measureBtn.addEventListener('click', () => {
+            const output = Number(outputCell.textContent);
+            state.measurements.push({ input: state.input, output });
+            renderLog();
+        });
+
+        renderOutputPreview();
+        renderLog();
+    </script>
+</body>
+
+</html>
