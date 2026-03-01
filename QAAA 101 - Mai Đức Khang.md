@@ -479,6 +479,29 @@ Qubit có một số đặc tính mà bit không có. Để nghiên cứu điề
 - Thực hiện phép đo bằng cách nhấp vào _nút Đo_ .
 - Sử dụng thao tác kéo và thả để di chuyển, thêm hoặc xóa các cổng lượng tử.
   
-[Thử nghiệm ngay ở đây]()
+[Thử nghiệm ngay ở đây](https://roll249.github.io/khang_note/hadamard.html)
 
+# Sự chồng chập
+Trong khi cổng **X** này trông không quá mới, bạn có thể đã nhận thấy đó gọi là cổng Hadamard. Cổng **H** đảm bảo rằng chúng ta đo lường $|0\rangle$ trong khoảng 50% trường hợp và $|1\rangle$ trong 50% còn lại
+Việc áp dụng cổng Hadamard do đó đưa qubit vào trạng thái mà trong đó xác xuất đo được $|0\rangle$ hoặc $|1\rangle$ trong mỗi trường hợp, tỉ lệ này là 50%. Như vậy, bạn đã khám phá ra một trong những đặc điểm đặc biệt của thế giới máy tính lượng tử:
 
+> Một qubit có thể ở trạng thái $|0\rangle$, trong trạng thái $|1\rangle$ hoặc ở trong trạng thái chồng chập của $|0\rangle$ hoặc $|1\rangle$. Khi đó, nó có 1 xác suất nhất định để được đo lường như vậy ($|0\rangle$ hoặc $|1\rangle$). Tuy nhiên, phép đo sẽ phá vỡ trạng thái chồng chất - tức là tất cả các phép đo tiếp theo sẽ cho cùng 1 kết quả như phép đo ban đầu
+
+Điều này khác với cách hoạt động của bit, vì vậy chúng ta hãy thử hiểu rõ hơn bằng cách so sánh với màu sắc.
+
+Hãy biểu diễn trạng thái **|0⟩** bằng màu đỏ <span style="color: red;">■</span> và trạng thái **|1⟩** bằng màu xanh dương <span style="color: blue;">■</span>. Một sự chồng chập (superposition) của **|0⟩** và **|1⟩** sẽ là một hỗn hợp của hai màu này. Nghĩa là, một màu nào đó trên quang phổ dưới đây:
+
+<div style="position: relative; height: 12px; width: 100%; background: linear-gradient(90deg, #ff4444, #4444ff); margin: 30px 0 10px 0; border-radius: 6px;">
+  <span style="position: absolute; left: 0; top: -25px; font-size: 1.2em; font-family: 'Times New Roman', serif;"> </span>
+  <span style="position: absolute; right: 0; top: -25px; font-size: 1.2em; font-family: 'Times New Roman', serif;"> </span>
+</div>
+<div style="height: 20px;"></div>
+$|0\rangle$                                                                                                                                                    $|1\rangle$ 
+
+Một hỗn hợp 50-50 sẽ trông giống màu tím <span style="color: purple;">■</span>, nhưng nếu có một sự chồng chập không cân bằng, chúng ta sẽ thấy một màu khác. Ví dụ, nếu tôi trộn 80% xanh dương <span style="color: blue;">■</span> với 20% đỏ <span style="color: red;">■</span>, tôi sẽ được màu tím xanh <span style="color: blueviolet;">■</span>.
+
+Đây là điểm khác biệt giữa thế giới lượng tử và thế giới cổ điển. Nếu tôi yêu cầu bạn đo màu của một hỗn hợp (tức là, một sự chồng chập của các màu) trong thế giới cổ điển, bạn có thể dễ dàng làm điều đó và nói rằng hỗn hợp là màu tím xanh <span style="color: blueviolet;">■</span> hoặc màu tím <span style="color: purple;">■</span>, v.v.
+
+Tuy nhiên, trong cơ học lượng tử, một phép đo sẽ phá hủy sự chồng chập. Nếu bạn được yêu cầu đo một sự chồng chập của các màu trong cơ học lượng tử, câu trả lời của bạn sẽ luôn là màu đỏ <span style="color: red;">■</span> hoặc màu xanh dương <span style="color: blue;">■</span>, đây là hai màu cơ bản (trạng thái) của hệ thống. Tuy nhiên, tỷ lệ của hai màu vẫn quan trọng. Tỷ lệ này sẽ xác định tần suất bạn nhận được mỗi kết quả.
+
+Vì vậy, nếu bạn đo màu của một trạng thái tím <span style="color: purple;">■</span>, 50% lần đo của bạn sẽ là màu xanh dương <span style="color: blue;">■</span> và 50% lần đo sẽ là màu đỏ <span style="color: red;">■</span>. Đối với màu tím xanh <span style="color: blueviolet;">■</span> (tức là 80% xanh dương <span style="color: blue;">■</span> và 20% đỏ <span style="color: red;">■</span>), bạn sẽ đo được màu xanh dương <span style="color: blue;">■</span> 80% lần và màu đỏ <span style="color: red;">■</span> 20% lần.

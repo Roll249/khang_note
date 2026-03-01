@@ -34,6 +34,18 @@
               "icon": "lucide-file",
               "title": "QAAA 101 - Mai Đức Khang"
             }
+          },
+          {
+            "id": "158d450f1318d417",
+            "type": "leaf",
+            "state": {
+              "type": "release-notes",
+              "state": {
+                "currentVersion": "1.12.4"
+              },
+              "icon": "lucide-book-up",
+              "title": "Release Notes 1.12.4"
+            }
           }
         ],
         "currentTab": 1
@@ -200,7 +212,9 @@
   },
   "active": "25fec682f2921970",
   "lastOpenFiles": [
+    "model.html",
     "hadamard.html",
+    "foundations05a.html",
     "Tài liệu hướng dẫn.md",
     "().md",
     "QAAA 101 - Mai Đức Khang.md",

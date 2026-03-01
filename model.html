@@ -1,0 +1,387 @@
+<!doctype html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Foundations05a - Superposition</title>
+    <style>
+        :root {
+            --Q-color-red: rgb(212, 17, 17);
+            --Q-color-blue: rgb(41, 116, 230);
+            --bg: #f5f7fb;
+            --text: #2d3a4a;
+            --card: #ffffff;
+            --line: #dbe2f0;
+            --btn-a: #6f9ff8;
+            --btn-b: #4ed29f;
+            --shadow: 0 8px 20px rgba(30, 50, 90, 0.16);
+            --radius: 12px;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Inter, "Segoe UI", Roboto, Arial, sans-serif;
+            color: var(--text);
+            background: var(--bg);
+            padding: 24px;
+        }
+
+        .page {
+            max-width: 980px;
+            margin: 0 auto;
+            display: grid;
+            gap: 24px;
+        }
+
+        .section {
+            background: var(--card);
+            border: 1px solid var(--line);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 16px;
+        }
+
+        .section h2 {
+            margin: 0 0 12px;
+            font-size: 24px;
+        }
+
+        .Q-button {
+            border: 0;
+            color: #fff;
+            font-size: 24px;
+            font-weight: 600;
+            border-radius: 999px;
+            padding: 10px 28px;
+            background: linear-gradient(90deg, var(--btn-a), var(--btn-b));
+            box-shadow: var(--shadow);
+            cursor: pointer;
+        }
+
+        .color-row {
+            margin: 1rem;
+            display: flex;
+            flex-direction: row;
+            line-height: 5rem;
+            align-items: center;
+            gap: 14px;
+            flex-wrap: wrap;
+        }
+
+        #mixed-color-applet {
+            font-size: 8rem;
+            margin-top: -0.5rem;
+        }
+
+        #color-measure-result-list {
+            font-size: 3rem;
+            width: 60%;
+            min-width: 280px;
+            height: 4rem;
+            padding-left: 0.2rem;
+            background-color: white;
+            overflow: hidden;
+            line-height: 4rem;
+            border: 1px solid #dfe6f2;
+            border-radius: 8px;
+            white-space: nowrap;
+        }
+
+        .fadein {
+            display: inline-block;
+            animation: fadein 300ms ease;
+        }
+
+        @keyframes fadein {
+            from {
+                transform: translateY(8px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .pie-wrap {
+            top: -30px;
+            position: relative;
+            left: -20px;
+        }
+
+        .pie {
+            width: 86px;
+            aspect-ratio: 1;
+            border-radius: 50%;
+            border: 2px solid #d7deea;
+            position: relative;
+            background: var(--Q-color-red);
+            overflow: hidden;
+        }
+
+        .pie__segment {
+            --offset: 0;
+            --value: 50;
+            position: absolute;
+            inset: 0;
+            border-radius: 50%;
+            background: conic-gradient(from calc(var(--offset) * 1deg), var(--Q-color-red) 0 calc(var(--value) * 1%), var(--Q-color-blue) calc(var(--value) * 1%) 100%);
+        }
+
+        .color-switcher {
+            text-align: center;
+            font-size: 20px;
+            margin-bottom: 8px;
+        }
+
+        .mix-dot {
+            cursor: pointer;
+            font-size: 2rem;
+            vertical-align: middle;
+            user-select: none;
+        }
+
+        .sphere-row {
+            display: flex;
+            flex-direction: row;
+            margin-top: 1em;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .sphere-box {
+            flex-grow: 3;
+            text-align: center;
+            min-width: 260px;
+        }
+
+        .sphere-actions {
+            flex-grow: 1;
+            text-align: center;
+            margin-top: 25px;
+            min-width: 170px;
+        }
+
+        .status {
+            text-align: center;
+            font-size: 18px;
+            color: #4f5f77;
+            margin-top: 8px;
+            min-height: 24px;
+        }
+
+        @media (max-width: 760px) {
+            body {
+                padding: 12px;
+            }
+
+            .Q-button {
+                font-size: 20px;
+            }
+
+            #mixed-color-applet {
+                font-size: 6rem;
+            }
+
+            #color-measure-result-list {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="page">
+        <section class="section">
+            <h2>Superposition bằng trộn màu</h2>
+            <div class="color-row">
+                <div id="mixed-color-applet" style="color: rgb(174, 73, 104);">■</div>
+                <button class="Q-button" type="button" onclick="measureColor();this.blur();">Measure</button>
+                <div id="color-measure-result-list"></div>
+                <div class="pie-wrap">
+                    <div class="pie" id="color-pie">
+                        <div class="pie__segment" id="pie-segment" style="--offset: 0; --value: 50;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="color-switcher">Switch color to
+                <span class="mix-dot" style="color:rgb(212,17,17);" onclick="mix(0.0)">■</span>,
+                <span class="mix-dot" style="color:rgb(193,45,60);" onclick="mix(0.2)">■</span>,
+                <span class="mix-dot" style="color:rgb(174,73,104);" onclick="mix(0.4)">■</span>,
+                <span class="mix-dot" style="color:rgb(155,101,147);" onclick="mix(0.6)">■</span>,
+                <span class="mix-dot" style="color:rgb(136,129,191);" onclick="mix(0.8)">■</span>, or
+                <span class="mix-dot" style="color:rgb(117,157,235);" onclick="mix(1)">■</span>.
+            </div>
+            <div class="status" id="color-status"></div>
+        </section>
+
+        <section class="section">
+            <h2>Mô hình Bloch sphere và đo</h2>
+            <div class="sphere-row">
+                <div class="sphere-box">
+                    <svg viewBox="0 0 820 820" height="260px">
+                        <ellipse cx="404.288" cy="404.288" rx="363.844" ry="363.844" style="fill: url(#_Radial1)">
+                        </ellipse>
+                        <ellipse cx="404.288" cy="404.288" rx="363.844" ry="363.844"
+                            style="fill: none; stroke: rgb(165, 165, 165); stroke-width: 17.52px;"></ellipse>
+                        <path
+                            d="M55.31,383.119C71.482,368.944 96.262,357.633 125.623,348.637C213.25,321.795 341.727,315.586 404.288,315.586C438.112,315.586 470.858,316.783 501.93,319.021C534.453,321.363 565.143,324.849 593.319,329.297C623.411,334.05 768.132,359.171 768.132,409.885"
+                            style="fill: none; fill-rule: nonzero; stroke: rgb(165, 165, 165); stroke-width: 17.52px; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 35.04, 52.53;">
+                        </path>
+                        <path
+                            d="M404.288,768.132C484.774,768.132 550.018,605.232 550.018,404.288C550.018,203.343 484.774,40.444 404.288,40.444"
+                            style="fill: none; fill-rule: nonzero; stroke: rgb(165, 165, 165); stroke-width: 17.52px; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 35.04, 52.53;">
+                        </path>
+                        <path
+                            d="M453.144,61.394C437.872,47.831 421.424,40.444 404.288,40.444C323.802,40.444 258.558,203.343 258.558,404.288C258.558,605.232 323.802,768.132 404.288,768.132C442.724,768.132 472.084,731.505 490.566,697.545M549.61,376.837C548.543,341.146 545.412,306.885 540.52,274.804"
+                            style="fill: none; fill-rule: nonzero; stroke: rgb(165, 165, 165); stroke-width: 17.52px; stroke-linecap: round; stroke-linejoin: round;">
+                        </path>
+                        <path
+                            d="M84.896,364.238C58.003,377.701 40.444,394.786 40.444,409.885C40.444,460.056 203.344,500.73 404.288,500.73C605.233,500.73 768.132,460.056 768.132,409.885C768.132,397.001 758.161,384.717 740.113,373.532M589.292,328.668C562.032,324.49 532.481,321.204 501.252,318.972"
+                            style="fill: none; fill-rule: nonzero; stroke: rgb(165, 165, 165); stroke-width: 17.52px; stroke-linecap: round; stroke-linejoin: round;">
+                        </path>
+
+                        <g id="pfeil-oben" style="display: none;">
+                            <path d="M403.91,396.91L403.91,112.278"
+                                style="fill: none; fill-rule: nonzero; stroke: rgb(12, 123, 136); stroke-width: 23.82px; stroke-linecap: round; stroke-linejoin: round;">
+                            </path>
+                            <path d="M371.057,122.072L436.763,122.072L403.91,47.775L371.057,122.072Z"
+                                style="fill: rgb(12, 123, 136)"></path>
+                        </g>
+
+                        <g id="pfeil-unten" style="display: none;">
+                            <path d="M403.91,416.253L403.91,700.884"
+                                style="fill: none; fill-rule: nonzero; stroke: rgb(12, 123, 136); stroke-width: 23.82px; stroke-linecap: round; stroke-linejoin: round;">
+                            </path>
+                            <path d="M436.763,691.09L371.057,691.09L403.91,765.387L436.763,691.09Z"
+                                style="fill: rgb(12, 123, 136)"></path>
+                        </g>
+
+                        <g id="pfeil-vorne" style="display: block;">
+                            <path d="M404.957,401.179L306.925,462.618"
+                                style="fill: none; fill-rule: nonzero; stroke: rgb(12, 123, 136); stroke-width: 23.87px; stroke-linecap: round; stroke-linejoin: round; stroke-miterlimit: 22.9256;">
+                            </path>
+                            <path d="M335.181,487.466L296.878,426.35L246.932,500.217L335.181,487.466Z"
+                                style="fill: rgb(12, 123, 136)"></path>
+                        </g>
+
+                        <defs>
+                            <radialGradient id="_Radial1" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse"
+                                gradientTransform="matrix(-153.767,-329.755,-329.755,153.767,222.366,222.366)">
+                                <stop offset="0" style="stop-color: rgb(237, 237, 237); stop-opacity: 1"></stop>
+                                <stop offset="1" style="stop-color: rgb(204, 204, 204); stop-opacity: 1"></stop>
+                            </radialGradient>
+                        </defs>
+                    </svg>
+                </div>
+
+                <div class="sphere-actions">
+                    <button class="Q-button" type="button" id="measurement-button"
+                        onclick="animateMeasurement();this.blur();">Measure</button>
+                </div>
+            </div>
+            <div class="status" id="bloch-status"></div>
+        </section>
+    </div>
+
+    <script>
+        const colorState = {
+            blueProbability: 0.4,
+            history: [],
+            blueCount: 0,
+            redCount: 0,
+            maxHistory: 42
+        };
+
+        const mixedColorApplet = document.getElementById('mixed-color-applet');
+        const colorMeasureResultList = document.getElementById('color-measure-result-list');
+        const pieSegment = document.getElementById('pie-segment');
+        const colorStatus = document.getElementById('color-status');
+        const pfeilOben = document.getElementById('pfeil-oben');
+        const pfeilUnten = document.getElementById('pfeil-unten');
+        const pfeilVorne = document.getElementById('pfeil-vorne');
+        const blochStatus = document.getElementById('bloch-status');
+
+        function mix(bluePart) {
+            colorState.blueProbability = Math.max(0, Math.min(1, Number(bluePart)));
+            const redPart = 1 - colorState.blueProbability;
+            const red = Math.round(212 * redPart + 117 * colorState.blueProbability);
+            const green = Math.round(17 * redPart + 157 * colorState.blueProbability);
+            const blue = Math.round(17 * redPart + 235 * colorState.blueProbability);
+
+            mixedColorApplet.style.color = `rgb(${red}, ${green}, ${blue})`;
+            colorStatus.textContent = `Tỉ lệ đo hiện tại: Đỏ ${(redPart * 100).toFixed(0)}% · Xanh ${(colorState.blueProbability * 100).toFixed(0)}%`;
+        }
+
+        function updateColorHistoryView() {
+            colorMeasureResultList.innerHTML = colorState.history
+                .map((item) => `<span class="fadein" style="color:${item === 'blue' ? 'var(--Q-color-blue)' : 'var(--Q-color-red)'};">■</span>`)
+                .join('');
+
+            const total = colorState.redCount + colorState.blueCount;
+            const redRatio = total === 0 ? 0.5 : colorState.redCount / total;
+            pieSegment.style.setProperty('--value', String((redRatio * 100).toFixed(1)));
+        }
+
+        function measureColor() {
+            const isBlue = Math.random() < colorState.blueProbability;
+            const result = isBlue ? 'blue' : 'red';
+            colorState.history.push(result);
+
+            if (colorState.history.length > colorState.maxHistory) {
+                const removed = colorState.history.shift();
+                if (removed === 'blue') colorState.blueCount -= 1;
+                if (removed === 'red') colorState.redCount -= 1;
+            }
+
+            if (result === 'blue') colorState.blueCount += 1;
+            if (result === 'red') colorState.redCount += 1;
+
+            updateColorHistoryView();
+        }
+
+        let measurementLock = false;
+
+        function showArrow(mode) {
+            pfeilVorne.style.display = mode === 'front' ? 'block' : 'none';
+            pfeilOben.style.display = mode === 'up' ? 'block' : 'none';
+            pfeilUnten.style.display = mode === 'down' ? 'block' : 'none';
+        }
+
+        function animateMeasurement() {
+            if (measurementLock) return;
+            measurementLock = true;
+
+            showArrow('front');
+            blochStatus.textContent = 'Đang chuẩn bị trạng thái chồng chập cân bằng (50/50)...';
+
+            setTimeout(() => {
+                const isZero = Math.random() < 0.5;
+                showArrow(isZero ? 'up' : 'down');
+                blochStatus.textContent = isZero
+                    ? 'Đo được |0⟩: trạng thái sụp đổ về cực bắc.'
+                    : 'Đo được |1⟩: trạng thái sụp đổ về cực nam.';
+
+                setTimeout(() => {
+                    showArrow('front');
+                    blochStatus.textContent = 'Sẵn sàng cho lần đo tiếp theo.';
+                    measurementLock = false;
+                }, 950);
+            }, 380);
+        }
+
+        mix(0.4);
+        updateColorHistoryView();
+        blochStatus.textContent = 'Nhấn Measure để xem phép đo làm sụp đổ trạng thái.';
+    </script>
+</body>
+
+</html>
