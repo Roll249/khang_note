@@ -1,0 +1,635 @@
+<!doctype html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Foundations07 - More Qubits, More Fun</title>
+  <style>
+    :root {
+      --bg: #f4f6fa;
+      --card: #fff;
+      --line: #dbe2ef;
+      --muted: #98a6bc;
+      --text: #344154;
+      --gate: #515d6d;
+      --accent: #8f6161;
+      --shadow: 0 8px 20px rgba(35, 52, 84, 0.14);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Inter, "Segoe UI", Roboto, Arial, sans-serif;
+      padding: 18px;
+    }
+
+    .wrap {
+      max-width: 1020px;
+      margin: 0 auto;
+      display: grid;
+      gap: 18px;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+      padding: 14px;
+    }
+
+    h2 {
+      margin: 0 0 8px;
+      font-size: 28px;
+    }
+
+    p.lead {
+      margin: 0 0 12px;
+      font-size: 18px;
+      line-height: 1.5;
+      color: #4d5b70;
+    }
+
+    .palette {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+
+    .gate {
+      width: 62px;
+      height: 62px;
+      border-radius: 8px;
+      background: var(--gate);
+      color: #fff;
+      display: grid;
+      place-items: center;
+      font-size: 34px;
+      font-weight: 700;
+      user-select: none;
+      cursor: grab;
+      box-shadow: var(--shadow);
+    }
+
+    .gate.identity {
+      font-size: 36px;
+      letter-spacing: 1px;
+    }
+
+    .circuit {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      overflow: hidden;
+      background: #fff;
+    }
+
+    .toolbar {
+      display: flex;
+      width: fit-content;
+      border-right: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .tool {
+      width: 70px;
+      height: 54px;
+      display: grid;
+      place-items: center;
+      border-right: 1px solid var(--line);
+      color: #66758a;
+      font-size: 23px;
+      user-select: none;
+      background: #fff;
+    }
+
+    .tool:last-child { border-right: 0; }
+    .tool.dim { opacity: 0.35; }
+
+    .board-wrap {
+      overflow-x: auto;
+      border-top: 1px solid var(--line);
+    }
+
+    .board {
+      min-width: 850px;
+      display: grid;
+      grid-template-columns: 86px 140px repeat(5, 1fr);
+      grid-auto-rows: 76px;
+      position: relative;
+    }
+
+    .wire {
+      position: absolute;
+      left: 226px;
+      right: 12px;
+      height: 2px;
+      background: #8799b8;
+      z-index: 0;
+    }
+
+    .wire.w1 { top: 113px; }
+    .wire.w2 { top: 189px; }
+
+    .cell {
+      border-right: 1px solid #edf1f7;
+      border-bottom: 1px solid #edf1f7;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #fff;
+      color: var(--muted);
+      font-size: 28px;
+      font-weight: 700;
+      z-index: 1;
+    }
+
+    .cell.label {
+      justify-content: flex-start;
+      padding-left: 18px;
+      font-size: 29px;
+    }
+
+    .cell.input {
+      cursor: pointer;
+      font-size: 34px;
+    }
+
+    .slot {
+      width: 100%;
+      height: 100%;
+      border-radius: 10px;
+      display: grid;
+      place-items: center;
+      position: relative;
+      z-index: 3;
+    }
+
+    .slot.drag {
+      outline: 2px dashed #9cb3df;
+      outline-offset: -5px;
+      background: #eef4ff;
+    }
+
+    .placed {
+      width: 64px;
+      height: 64px;
+      border-radius: 8px;
+      background: var(--gate);
+      color: #fff;
+      display: grid;
+      place-items: center;
+      font-size: 32px;
+      font-weight: 700;
+      cursor: grab;
+      user-select: none;
+    }
+
+    .placed.identity {
+      background: #e7ecf4;
+      color: #7f8da4;
+      border: 2px dashed #b9c7dc;
+      font-size: 30px;
+    }
+
+    .cnot-dot {
+      width: 14px;
+      height: 14px;
+      border-radius: 999px;
+      background: #253040;
+      position: absolute;
+      top: 7px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 4;
+      cursor: grab;
+    }
+
+    .cnot-link {
+      position: absolute;
+      width: 2px;
+      height: 52px;
+      background: #243145;
+      top: 12px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 3;
+      pointer-events: none;
+    }
+
+    .cnot-target {
+      width: 64px;
+      height: 64px;
+      border-radius: 999px;
+      background: var(--gate);
+      color: #fff;
+      display: grid;
+      place-items: center;
+      font-size: 44px;
+      font-weight: 700;
+      user-select: none;
+      cursor: grab;
+      z-index: 4;
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 10px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      border: 1px solid #ccd5e4;
+      background: #fff;
+      color: #435168;
+      padding: 8px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .report {
+      margin-top: 10px;
+      background: #f0f1f5;
+      border: 1px solid #e0e4ec;
+      border-radius: 10px;
+      padding: 12px 14px;
+      font-family: "Cascadia Mono", Consolas, "Courier New", monospace;
+      font-size: 20px;
+      line-height: 1.4;
+      color: var(--accent);
+      white-space: pre;
+    }
+
+    .question {
+      margin-top: 10px;
+      color: #5d6b80;
+      font-size: 16px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <section class="card" id="simA">
+      <h2>A circuit with two qubits</h2>
+      <p class="lead">Below you find a circuit with two qubits. A superposition between how many states can you create?</p>
+
+      <div class="palette">
+        <div class="gate" draggable="true" data-gate="H">H</div>
+      </div>
+
+      <div class="circuit">
+        <div class="toolbar">
+          <div class="tool">🔓</div><div class="tool">⟲</div><div class="tool dim">⟳</div><div class="tool dim">C</div><div class="tool dim">S</div>
+        </div>
+        <div class="board-wrap">
+          <div class="board" id="boardA">
+            <div class="wire w1"></div><div class="wire w2"></div>
+            <div class="cell">↘</div><div class="cell"></div><div class="cell">1</div><div class="cell">2</div><div class="cell">3</div><div class="cell">4</div><div class="cell">5</div>
+            <div class="cell input" data-input="0">0</div><div class="cell label">Nr. 1</div>
+            <div class="cell"><div class="slot" data-row="0" data-col="0"></div></div>
+            <div class="cell"><div class="slot" data-row="0" data-col="1"></div></div>
+            <div class="cell"><div class="slot" data-row="0" data-col="2"></div></div>
+            <div class="cell"><div class="slot" data-row="0" data-col="3"></div></div>
+            <div class="cell"><div class="slot" data-row="0" data-col="4"></div></div>
+            <div class="cell input" data-input="1">0</div><div class="cell label">Nr. 2</div>
+            <div class="cell"><div class="slot" data-row="1" data-col="0"></div></div>
+            <div class="cell"><div class="slot" data-row="1" data-col="1"></div></div>
+            <div class="cell"><div class="slot" data-row="1" data-col="2"></div></div>
+            <div class="cell"><div class="slot" data-row="1" data-col="3"></div></div>
+            <div class="cell"><div class="slot" data-row="1" data-col="4"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="actions"><button class="btn" id="measureA">Measure</button><button class="btn" id="resetA">Reset</button></div>
+      <div class="report" id="reportA"></div>
+      <div class="question">A superposition between how many states can we form with two qubits? (A:1, B:2, C:3, D:4)</div>
+    </section>
+
+    <section class="card" id="simB">
+      <h2>Gates, again</h2>
+      <p class="lead">Below you will find a gate that works with two qubits. Measure multiple times with different input values to explore the effect.</p>
+
+      <div class="palette">
+        <div class="gate" draggable="true" data-gate="X">X</div>
+        <div class="gate identity" draggable="true" data-gate="*">*</div>
+      </div>
+
+      <div class="circuit">
+        <div class="toolbar">
+          <div class="tool">🔓</div><div class="tool">⟲</div><div class="tool dim">⟳</div><div class="tool dim">C</div><div class="tool dim">S</div>
+        </div>
+        <div class="board-wrap">
+          <div class="board" id="boardB">
+            <div class="wire w1"></div><div class="wire w2"></div>
+            <div class="cell">↘</div><div class="cell"></div><div class="cell">1</div><div class="cell">2</div><div class="cell">3</div><div class="cell">4</div><div class="cell">5</div>
+            <div class="cell input" data-input="0">0</div><div class="cell label">Nr. 1</div>
+            <div class="cell"><div class="slot" data-row="0" data-col="0"></div></div>
+            <div class="cell"><div class="slot" data-row="0" data-col="1"></div></div>
+            <div class="cell"><div class="slot" data-row="0" data-col="2"></div></div>
+            <div class="cell"><div class="slot" data-row="0" data-col="3"></div></div>
+            <div class="cell"><div class="slot" data-row="0" data-col="4"></div></div>
+            <div class="cell input" data-input="1">0</div><div class="cell label">Nr. 2</div>
+            <div class="cell"><div class="slot" data-row="1" data-col="0"></div></div>
+            <div class="cell"><div class="slot" data-row="1" data-col="1"></div></div>
+            <div class="cell"><div class="slot" data-row="1" data-col="2"></div></div>
+            <div class="cell"><div class="slot" data-row="1" data-col="3"></div></div>
+            <div class="cell"><div class="slot" data-row="1" data-col="4"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="actions"><button class="btn" id="measureB">Measure</button><button class="btn" id="resetB">Reset</button></div>
+      <div class="report" id="reportB"></div>
+      <div class="question">Hiệu ứng đúng của gate này: nếu qubit 1 là |1⟩ thì qubit 2 toggle; nếu qubit 1 là |0⟩ thì qubit 2 giữ nguyên.</div>
+    </section>
+  </div>
+
+  <script>
+    const SHOTS = 1000;
+    const SQRT2 = Math.sqrt(2);
+
+    function makeSimulator(config) {
+      const root = document.getElementById(config.rootId);
+      const board = root.querySelector(config.boardSelector);
+      const slots = [...board.querySelectorAll('.slot')];
+      const inputs = [...board.querySelectorAll('.cell.input')];
+      const paletteGates = [...root.querySelectorAll('.palette .gate')];
+      const report = root.querySelector(config.reportSelector);
+      const btnMeasure = root.querySelector(config.measureSelector);
+      const btnReset = root.querySelector(config.resetSelector);
+
+      const st = {
+        input: [0, 0],
+        timeline: Array.from({ length: 5 }, () => ({ q0: null, q1: null, cx: false })),
+        history: []
+      };
+
+      function encode(ev, payload) {
+        const text = JSON.stringify(payload);
+        ev.dataTransfer.setData('text/plain', text);
+        ev.dataTransfer.effectAllowed = 'move';
+        window.__dragPayload = payload;
+      }
+
+      function decode(ev) {
+        const raw = ev.dataTransfer.getData('text/plain');
+        if (!raw) return window.__dragPayload || null;
+        try { return JSON.parse(raw); } catch { return window.__dragPayload || null; }
+      }
+
+      function applySingleQubit(stateVec, qubit, gate) {
+        if (gate === '*') {
+          return [...stateVec];
+        }
+        if (gate !== 'H' && gate !== 'X') return stateVec;
+        if (gate === 'X') {
+          const out = [0, 0, 0, 0];
+          for (let base = 0; base < 4; base += 1) {
+            const pair = base ^ (1 << (1 - qubit));
+            out[pair] += stateVec[base];
+          }
+          return out;
+        }
+        const out = [0, 0, 0, 0];
+        for (let base = 0; base < 4; base += 1) {
+          const bit = (base >> (1 - qubit)) & 1;
+          const pair = bit ? base & ~(1 << (1 - qubit)) : base | (1 << (1 - qubit));
+          if (bit === 0) {
+            out[base] += stateVec[base] / SQRT2;
+            out[pair] += stateVec[base] / SQRT2;
+          } else {
+            out[pair] += stateVec[base] / SQRT2;
+            out[base] -= stateVec[base] / SQRT2;
+          }
+        }
+        return out;
+      }
+
+      function applyCNOT(stateVec) {
+        const out = [0, 0, 0, 0];
+        // qubit 1 (q0) control, qubit 2 (q1) target
+        // basis order: |q0 q1> => 00,01,10,11
+        out[0] = stateVec[0];
+        out[1] = stateVec[1];
+        out[2] = stateVec[3];
+        out[3] = stateVec[2];
+        return out;
+      }
+
+      function probabilities() {
+        let vec = [0, 0, 0, 0];
+        const idx = st.input[0] * 2 + st.input[1];
+        vec[idx] = 1;
+
+        for (let col = 0; col < st.timeline.length; col += 1) {
+          const op = st.timeline[col];
+          if (op.cx) {
+            vec = applyCNOT(vec);
+          }
+          if (op.q0) vec = applySingleQubit(vec, 0, op.q0);
+          if (op.q1) vec = applySingleQubit(vec, 1, op.q1);
+        }
+
+        return vec.map((amp) => amp * amp);
+      }
+
+      function bars(prob) {
+        const count = Math.round(prob * SHOTS);
+        const full = Math.round(prob * 20);
+        return { count, bar: `${'█'.repeat(full)}${'░'.repeat(20 - full)}`, pct: Math.round(prob * 100) };
+      }
+
+      function renderReport() {
+        const probs = probabilities();
+        const labels = ['|00⟩', '|01⟩', '|10⟩', '|11⟩'];
+        report.textContent = labels.map((label, i) => {
+          const b = bars(probs[i]);
+          return `${i + 1}  ${label}  ${b.bar} ${String(b.pct).padStart(3, ' ')}% chance`;
+        }).join('\n');
+      }
+
+      function createPlaced(symbol, extraClass = '') {
+        const node = document.createElement('div');
+        node.className = `placed ${extraClass}`.trim();
+        node.textContent = symbol;
+        if (symbol === '*') node.classList.add('identity');
+        node.draggable = true;
+        return node;
+      }
+
+      function renderBoard() {
+        inputs.forEach((inp, i) => inp.textContent = String(st.input[i]));
+        slots.forEach((slot) => {
+          slot.classList.remove('drag');
+          slot.innerHTML = '';
+        });
+
+        for (let col = 0; col < st.timeline.length; col += 1) {
+          const op = st.timeline[col];
+          const slotQ0 = slots.find((s) => Number(s.dataset.row) === 0 && Number(s.dataset.col) === col);
+          const slotQ1 = slots.find((s) => Number(s.dataset.row) === 1 && Number(s.dataset.col) === col);
+
+          if (op.cx && slotQ0 && slotQ1) {
+            const link = document.createElement('div');
+            link.className = 'cnot-link';
+            slotQ0.appendChild(link);
+            const dot = document.createElement('div');
+            dot.className = 'cnot-dot';
+            dot.draggable = true;
+            dot.addEventListener('dragstart', (ev) => encode(ev, { type: 'CX', fromCol: col }));
+            dot.addEventListener('dblclick', () => { st.timeline[col].cx = false; renderAll(); });
+            slotQ0.appendChild(dot);
+            const target = document.createElement('div');
+            target.className = 'cnot-target';
+            target.textContent = 'X';
+            target.draggable = true;
+            target.dataset.col = String(col);
+            target.dataset.kind = 'cx';
+            target.addEventListener('dragstart', (ev) => encode(ev, { type: 'CX', fromCol: col }));
+            target.addEventListener('dblclick', () => { st.timeline[col].cx = false; renderAll(); });
+            slotQ1.appendChild(target);
+          }
+
+          if (op.q0 && slotQ0) {
+            const n = createPlaced(op.q0);
+            n.dataset.col = String(col);
+            n.dataset.row = '0';
+            n.dataset.kind = 'single';
+            n.addEventListener('dragstart', (ev) => encode(ev, { type: op.q0, fromCol: col, fromRow: 0 }));
+            n.addEventListener('dblclick', () => { st.timeline[col].q0 = null; renderAll(); });
+            slotQ0.appendChild(n);
+          }
+
+          if (op.q1 && slotQ1) {
+            const n = createPlaced(op.q1);
+            n.dataset.col = String(col);
+            n.dataset.row = '1';
+            n.dataset.kind = 'single';
+            n.addEventListener('dragstart', (ev) => encode(ev, { type: op.q1, fromCol: col, fromRow: 1 }));
+            n.addEventListener('dblclick', () => { st.timeline[col].q1 = null; renderAll(); });
+            slotQ1.appendChild(n);
+          }
+        }
+      }
+
+      function placeSingleGate(col, row, gateType) {
+        st.timeline[col].cx = false;
+        st.timeline[col][row === 0 ? 'q0' : 'q1'] = gateType;
+      }
+
+      function renderAll() {
+        renderBoard();
+        renderReport();
+      }
+
+      function clearFromSource(payload) {
+        if (payload.fromCol === undefined || payload.fromCol === null) return;
+        const c = Number(payload.fromCol);
+        if (payload.type === 'H' || payload.type === 'X' || payload.type === '*') {
+          st.timeline[c][payload.fromRow === 1 ? 'q1' : 'q0'] = null;
+        }
+        if (payload.type === 'CX') {
+          st.timeline[c].cx = false;
+        }
+      }
+
+      paletteGates.forEach((gate) => {
+        gate.addEventListener('dragstart', (ev) => {
+          const type = gate.dataset.gate || config.paletteType;
+          encode(ev, { type, fromCol: null });
+        });
+      });
+
+      slots.forEach((slot) => {
+        slot.addEventListener('dragover', (ev) => {
+          ev.preventDefault();
+          slot.classList.add('drag');
+        });
+
+        slot.addEventListener('dragleave', () => slot.classList.remove('drag'));
+
+        slot.addEventListener('drop', (ev) => {
+          ev.preventDefault();
+          slots.forEach((s) => s.classList.remove('drag'));
+          const payload = decode(ev);
+          if (!payload) return;
+
+          const row = Number(slot.dataset.row);
+          const col = Number(slot.dataset.col);
+
+          const validDrop = (payload.type === 'H' || payload.type === 'X' || payload.type === '*')
+            ? true
+            : payload.type === 'CX'
+              ? row === 0 || row === 1
+              : false;
+
+          if (!validDrop) return;
+
+          clearFromSource(payload);
+
+          if (payload.type === 'H' || payload.type === 'X' || payload.type === '*') {
+            placeSingleGate(col, row, payload.type);
+          }
+
+          if (payload.type === 'CX') {
+            st.timeline[col].cx = true;
+            st.timeline[col].q0 = null;
+            st.timeline[col].q1 = null;
+          }
+
+          renderAll();
+        });
+      });
+
+      inputs.forEach((inp, i) => {
+        inp.addEventListener('click', () => {
+          st.input[i] = st.input[i] ? 0 : 1;
+          renderAll();
+        });
+      });
+
+      btnMeasure.addEventListener('click', () => {
+        st.history.push(probabilities());
+        renderReport();
+      });
+
+      btnReset.addEventListener('click', () => {
+        st.input = [0, 0];
+        st.timeline = Array.from({ length: 5 }, () => ({ q0: null, q1: null, cx: false }));
+        if (config.seed) config.seed(st.timeline);
+        renderAll();
+      });
+
+      if (config.seed) config.seed(st.timeline);
+      renderAll();
+    }
+
+    makeSimulator({
+      rootId: 'simA',
+      boardSelector: '#boardA',
+      reportSelector: '#reportA',
+      measureSelector: '#measureA',
+      resetSelector: '#resetA',
+      paletteType: 'H'
+    });
+
+    makeSimulator({
+      rootId: 'simB',
+      boardSelector: '#boardB',
+      reportSelector: '#reportB',
+      measureSelector: '#measureB',
+      resetSelector: '#resetB',
+      paletteType: 'X',
+      seed: (timeline) => { timeline[2].cx = true; }
+    });
+  </script>
+</body>
+
+</html>

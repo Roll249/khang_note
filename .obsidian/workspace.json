@@ -22,7 +22,7 @@
             }
           },
           {
-            "id": "25fec682f2921970",
+            "id": "158d450f1318d417",
             "type": "leaf",
             "state": {
               "type": "markdown",
@@ -33,18 +33,6 @@
               },
               "icon": "lucide-file",
               "title": "QAAA 101 - Mai Đức Khang"
-            }
-          },
-          {
-            "id": "158d450f1318d417",
-            "type": "leaf",
-            "state": {
-              "type": "release-notes",
-              "state": {
-                "currentVersion": "1.12.4"
-              },
-              "icon": "lucide-book-up",
-              "title": "Release Notes 1.12.4"
             }
           }
         ],
@@ -105,7 +93,8 @@
       }
     ],
     "direction": "horizontal",
-    "width": 300
+    "width": 300,
+    "collapsed": true
   },
   "right": {
     "id": "d00f74b20803e2f7",
@@ -210,26 +199,36 @@
       "bases:Create new base": false
     }
   },
-  "active": "25fec682f2921970",
+  "active": "158d450f1318d417",
   "lastOpenFiles": [
-    "model.html",
-    "hadamard.html",
-    "foundations05a.html",
-    "Tài liệu hướng dẫn.md",
+    "Pasted image 20260302210230.png",
+    "Pasted image 20260302210217.png",
+    "Pasted image 20260302210142.png",
+    "Pasted image 20260302210123.png",
+    "foundations10.html",
+    "CX.html",
+    "foundations09.html",
+    "together.html",
+    "foundations08.html",
+    "qubits.html",
+    "foundations07.html",
+    "assets/bloch-viz",
+    "assets",
     "().md",
     "QAAA 101 - Mai Đức Khang.md",
-    "foundations04-hadamard.html",
-    "quantum-circuit.html",
-    "erp.md",
-    "Untitled.md",
-    "web_plan.md",
+    "gate.html",
+    "hadamard_gate_chi_tiet.md",
+    "[.md",
     "full_tutorial.md",
-    "Cau 3.md",
-    "web_DB.md",
-    "web_tutorial.md",
-    "BA_plan.md",
-    "AI_plan.md",
+    "erp.md",
     "data_plan.md",
-    "Untitled"
+    "Cau 3.md",
+    "web_tutorial.md",
+    "web_plan.md",
+    "web_DB.md",
+    "Untitled.md",
+    "Tài liệu hướng dẫn.md",
+    "BA_plan.md",
+    "AI_plan.md"
   ]
 }

@@ -1,0 +1,675 @@
+<!doctype html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Foundations10 - 5-qubit quantum computer</title>
+  <style>
+    :root {
+      --bg: #f4f6fa;
+      --card: #fff;
+      --line: #dbe2ef;
+      --muted: #98a6bc;
+      --text: #344154;
+      --gate: #596579;
+      --accent: #8f6161;
+      --shadow: 0 8px 20px rgba(35, 52, 84, 0.14);
+      --active: #4f83f1;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Inter, "Segoe UI", Roboto, Arial, sans-serif;
+      padding: 18px;
+    }
+
+    .wrap {
+      max-width: 1120px;
+      margin: 0 auto;
+      display: grid;
+      gap: 14px;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+      padding: 14px;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: 32px;
+    }
+
+    p.lead {
+      margin: 0 0 12px;
+      font-size: 17px;
+      line-height: 1.5;
+      color: #4d5b70;
+    }
+
+    .palette {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .gate {
+      width: 62px;
+      height: 62px;
+      border-radius: 8px;
+      background: var(--gate);
+      color: #fff;
+      display: grid;
+      place-items: center;
+      font-size: 34px;
+      font-weight: 700;
+      user-select: none;
+      cursor: grab;
+      box-shadow: var(--shadow);
+    }
+
+    .toolbar {
+      display: flex;
+      width: fit-content;
+      border: 1px solid var(--line);
+      border-bottom: 0;
+      border-radius: 10px 10px 0 0;
+      overflow: hidden;
+      background: #fff;
+    }
+
+    .tool {
+      width: 70px;
+      height: 54px;
+      display: grid;
+      place-items: center;
+      border-right: 1px solid var(--line);
+      color: #66758a;
+      font-size: 23px;
+      user-select: none;
+      background: #fff;
+    }
+
+    .tool:last-child { border-right: 0; }
+    .tool.dim { opacity: 0.35; }
+    .tool.clickable { cursor: pointer; }
+    .tool.active {
+      color: #fff;
+      background: var(--active);
+    }
+
+    .board-wrap {
+      border: 1px solid var(--line);
+      border-radius: 0 10px 10px 10px;
+      overflow-x: auto;
+      background: #fff;
+    }
+
+    .board {
+      min-width: 980px;
+      display: grid;
+      grid-template-columns: 86px 140px repeat(5, 1fr);
+      grid-auto-rows: 70px;
+      position: relative;
+    }
+
+    .wire {
+      position: absolute;
+      left: 226px;
+      right: 12px;
+      height: 2px;
+      background: #8799b8;
+      z-index: 0;
+    }
+
+    .wire.w1 { top: 104px; }
+    .wire.w2 { top: 174px; }
+    .wire.w3 { top: 244px; }
+    .wire.w4 { top: 314px; }
+    .wire.w5 { top: 384px; }
+
+    .cell {
+      border-right: 1px solid #edf1f7;
+      border-bottom: 1px solid #edf1f7;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #fff;
+      color: var(--muted);
+      font-size: 26px;
+      font-weight: 700;
+      z-index: 1;
+    }
+
+    .cell.label {
+      justify-content: flex-start;
+      padding-left: 18px;
+      font-size: 26px;
+    }
+
+    .cell.input {
+      cursor: pointer;
+      font-size: 32px;
+    }
+
+    .slot {
+      width: 100%;
+      height: 100%;
+      border-radius: 10px;
+      display: grid;
+      place-items: center;
+      position: relative;
+      z-index: 2;
+    }
+
+    .slot.drag {
+      outline: 2px dashed #9cb3df;
+      outline-offset: -5px;
+      background: #eef4ff;
+    }
+
+    .placed {
+      width: 56px;
+      height: 56px;
+      border-radius: 8px;
+      background: var(--gate);
+      color: #fff;
+      display: grid;
+      place-items: center;
+      font-size: 32px;
+      font-weight: 700;
+      cursor: grab;
+      user-select: none;
+    }
+
+    .cnot-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 999px;
+      background: #253040;
+      position: absolute;
+      top: 8px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 4;
+      cursor: grab;
+    }
+
+    .cnot-link {
+      position: absolute;
+      width: 2px;
+      background: #243145;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 3;
+      pointer-events: none;
+    }
+
+    .cnot-target {
+      width: 56px;
+      height: 56px;
+      border-radius: 999px;
+      background: var(--gate);
+      color: #fff;
+      display: grid;
+      place-items: center;
+      font-size: 34px;
+      font-weight: 700;
+      user-select: none;
+      cursor: grab;
+      z-index: 4;
+    }
+
+    .actions {
+      margin-top: 10px;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .btn {
+      border: 1px solid #ccd5e4;
+      background: #fff;
+      color: #435168;
+      padding: 8px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .report-title {
+      margin: 0 0 8px;
+      font-size: 24px;
+      font-weight: 700;
+    }
+
+    .report {
+      margin-top: 10px;
+      background: #f0f1f5;
+      border: 1px solid #e0e4ec;
+      border-radius: 10px;
+      padding: 12px 14px;
+      font-family: "Cascadia Mono", Consolas, "Courier New", monospace;
+      font-size: 18px;
+      line-height: 1.35;
+      color: var(--accent);
+      white-space: pre;
+      max-height: 520px;
+      overflow: auto;
+    }
+
+    .quiz {
+      margin-top: 10px;
+      color: #4d5b70;
+      font-size: 16px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <section class="card">
+      <h1>A 5-qubit quantum computer</h1>
+      <p class="lead">Create a GHZ (Greenberger, Horne and Zeilinger) state for 5 qubits! How many gates do we need at least to create this state?</p>
+
+      <div class="palette">
+        <div class="gate" draggable="true" data-gate="H" title="Hadamard">H</div>
+        <div class="gate" draggable="true" data-gate="X" title="Pauli X">X</div>
+        <div class="gate" draggable="true" data-gate="T" title="T">T</div>
+      </div>
+
+      <div class="toolbar">
+        <div class="tool">🔓</div>
+        <div class="tool dim">⟲</div>
+        <div class="tool dim">⟳</div>
+        <div class="tool clickable" id="controlToggle">C</div>
+        <div class="tool dim">S</div>
+      </div>
+
+      <div class="board-wrap">
+        <div class="board" id="board">
+          <div class="wire w1"></div><div class="wire w2"></div><div class="wire w3"></div><div class="wire w4"></div><div class="wire w5"></div>
+
+          <div class="cell">↘</div><div class="cell"></div><div class="cell">1</div><div class="cell">2</div><div class="cell">3</div><div class="cell">4</div><div class="cell">5</div>
+
+          <div class="cell input" data-input="0">0</div><div class="cell label">Nr. 1</div>
+          <div class="cell"><div class="slot" data-row="0" data-col="0"></div></div>
+          <div class="cell"><div class="slot" data-row="0" data-col="1"></div></div>
+          <div class="cell"><div class="slot" data-row="0" data-col="2"></div></div>
+          <div class="cell"><div class="slot" data-row="0" data-col="3"></div></div>
+          <div class="cell"><div class="slot" data-row="0" data-col="4"></div></div>
+
+          <div class="cell input" data-input="1">0</div><div class="cell label">Nr. 2</div>
+          <div class="cell"><div class="slot" data-row="1" data-col="0"></div></div>
+          <div class="cell"><div class="slot" data-row="1" data-col="1"></div></div>
+          <div class="cell"><div class="slot" data-row="1" data-col="2"></div></div>
+          <div class="cell"><div class="slot" data-row="1" data-col="3"></div></div>
+          <div class="cell"><div class="slot" data-row="1" data-col="4"></div></div>
+
+          <div class="cell input" data-input="2">0</div><div class="cell label">Nr. 3</div>
+          <div class="cell"><div class="slot" data-row="2" data-col="0"></div></div>
+          <div class="cell"><div class="slot" data-row="2" data-col="1"></div></div>
+          <div class="cell"><div class="slot" data-row="2" data-col="2"></div></div>
+          <div class="cell"><div class="slot" data-row="2" data-col="3"></div></div>
+          <div class="cell"><div class="slot" data-row="2" data-col="4"></div></div>
+
+          <div class="cell input" data-input="3">0</div><div class="cell label">Nr. 4</div>
+          <div class="cell"><div class="slot" data-row="3" data-col="0"></div></div>
+          <div class="cell"><div class="slot" data-row="3" data-col="1"></div></div>
+          <div class="cell"><div class="slot" data-row="3" data-col="2"></div></div>
+          <div class="cell"><div class="slot" data-row="3" data-col="3"></div></div>
+          <div class="cell"><div class="slot" data-row="3" data-col="4"></div></div>
+
+          <div class="cell input" data-input="4">0</div><div class="cell label">Nr. 5</div>
+          <div class="cell"><div class="slot" data-row="4" data-col="0"></div></div>
+          <div class="cell"><div class="slot" data-row="4" data-col="1"></div></div>
+          <div class="cell"><div class="slot" data-row="4" data-col="2"></div></div>
+          <div class="cell"><div class="slot" data-row="4" data-col="3"></div></div>
+          <div class="cell"><div class="slot" data-row="4" data-col="4"></div></div>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button class="btn" id="measureBtn">Measure</button>
+        <button class="btn" id="resetBtn">Reset</button>
+      </div>
+
+      <div class="report-title">My measurements</div>
+      <p class="lead" style="margin-bottom:6px">After 1000 measurements we get the following distribution:</p>
+      <pre class="report" id="report"></pre>
+
+      <div class="quiz">How many gates do we need at least to create this GHZ state? A:3 &nbsp; B:4 &nbsp; C:5 &nbsp; D:6</div>
+    </section>
+  </div>
+
+  <script>
+    const NUM_QUBITS = 5;
+    const MOMENTS = 5;
+    const N = 1 << NUM_QUBITS;
+    const SHOTS = 1000;
+    const SQRT2 = Math.sqrt(2);
+
+    const board = document.getElementById('board');
+    const slots = [...board.querySelectorAll('.slot')];
+    const inputs = [...board.querySelectorAll('.cell.input')];
+    const paletteGates = [...document.querySelectorAll('.palette .gate')];
+    const report = document.getElementById('report');
+    const measureBtn = document.getElementById('measureBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const controlToggle = document.getElementById('controlToggle');
+
+    const st = {
+      input: Array(NUM_QUBITS).fill(0),
+      moments: Array.from({ length: MOMENTS }, () => ({ singles: Array(NUM_QUBITS).fill(null), cx: null })),
+      controlMode: false
+    };
+
+    function encode(ev, payload) {
+      const text = JSON.stringify(payload);
+      ev.dataTransfer.setData('text/plain', text);
+      ev.dataTransfer.effectAllowed = 'move';
+      window.__dragPayload = payload;
+    }
+
+    function decode(ev) {
+      const raw = ev.dataTransfer.getData('text/plain');
+      if (!raw) return window.__dragPayload || null;
+      try { return JSON.parse(raw); } catch { return window.__dragPayload || null; }
+    }
+
+    function bitAt(index, qubit) {
+      return (index >> (NUM_QUBITS - 1 - qubit)) & 1;
+    }
+
+    function flipBit(index, qubit) {
+      return index ^ (1 << (NUM_QUBITS - 1 - qubit));
+    }
+
+    function applyX(re, im, qubit) {
+      const outRe = new Float64Array(N);
+      const outIm = new Float64Array(N);
+      for (let i = 0; i < N; i += 1) {
+        const j = flipBit(i, qubit);
+        outRe[j] += re[i];
+        outIm[j] += im[i];
+      }
+      return [outRe, outIm];
+    }
+
+    function applyH(re, im, qubit) {
+      const outRe = new Float64Array(N);
+      const outIm = new Float64Array(N);
+      const mask = 1 << (NUM_QUBITS - 1 - qubit);
+      for (let i = 0; i < N; i += 1) {
+        if ((i & mask) !== 0) continue;
+        const j = i | mask;
+
+        const ar = re[i], ai = im[i];
+        const br = re[j], bi = im[j];
+
+        outRe[i] = (ar + br) / SQRT2;
+        outIm[i] = (ai + bi) / SQRT2;
+        outRe[j] = (ar - br) / SQRT2;
+        outIm[j] = (ai - bi) / SQRT2;
+      }
+      return [outRe, outIm];
+    }
+
+    function applyT(re, im, qubit) {
+      const outRe = new Float64Array(re);
+      const outIm = new Float64Array(im);
+      const c = Math.cos(Math.PI / 4);
+      const s = Math.sin(Math.PI / 4);
+      for (let i = 0; i < N; i += 1) {
+        if (bitAt(i, qubit) === 1) {
+          const rr = outRe[i];
+          const ii = outIm[i];
+          outRe[i] = rr * c - ii * s;
+          outIm[i] = rr * s + ii * c;
+        }
+      }
+      return [outRe, outIm];
+    }
+
+    function applyCNOT(re, im, control, target) {
+      const outRe = new Float64Array(re);
+      const outIm = new Float64Array(im);
+      const visited = new Uint8Array(N);
+      for (let i = 0; i < N; i += 1) {
+        if (visited[i]) continue;
+        if (bitAt(i, control) === 1) {
+          const j = flipBit(i, target);
+          if (j !== i) {
+            const rr = outRe[i], ii = outIm[i];
+            outRe[i] = outRe[j];
+            outIm[i] = outIm[j];
+            outRe[j] = rr;
+            outIm[j] = ii;
+            visited[j] = 1;
+          }
+        }
+        visited[i] = 1;
+      }
+      return [outRe, outIm];
+    }
+
+    function probabilities() {
+      let re = new Float64Array(N);
+      let im = new Float64Array(N);
+      let start = 0;
+      for (let q = 0; q < NUM_QUBITS; q += 1) {
+        start = (start << 1) | st.input[q];
+      }
+      re[start] = 1;
+
+      for (let col = 0; col < MOMENTS; col += 1) {
+        const m = st.moments[col];
+        if (m.cx) {
+          [re, im] = applyCNOT(re, im, m.cx.control, m.cx.target);
+        }
+        for (let q = 0; q < NUM_QUBITS; q += 1) {
+          const g = m.singles[q];
+          if (g === 'X') [re, im] = applyX(re, im, q);
+          if (g === 'H') [re, im] = applyH(re, im, q);
+          if (g === 'T') [re, im] = applyT(re, im, q);
+        }
+      }
+
+      const probs = new Float64Array(N);
+      for (let i = 0; i < N; i += 1) {
+        probs[i] = re[i] * re[i] + im[i] * im[i];
+      }
+      return probs;
+    }
+
+    function toKet(index) {
+      return index.toString(2).padStart(NUM_QUBITS, '0');
+    }
+
+    function bars(prob) {
+      const full = Math.round(prob * 20);
+      const pct = Math.round(prob * 100);
+      const count = Math.round(prob * SHOTS);
+      return { bar: `${'█'.repeat(full)}${'░'.repeat(20 - full)}`, pct, count };
+    }
+
+    function renderReport() {
+      const probs = probabilities();
+      const lines = [];
+      for (let i = 0; i < N; i += 1) {
+        const b = bars(probs[i]);
+        lines.push(`${String(i + 1).padStart(2, ' ')}  |${toKet(i)}⟩  ${b.bar} ${String(b.pct).padStart(3, ' ')}% chance`);
+      }
+      report.textContent = lines.join('\n');
+    }
+
+    function createPlaced(symbol) {
+      const node = document.createElement('div');
+      node.className = 'placed';
+      node.textContent = symbol;
+      node.draggable = true;
+      return node;
+    }
+
+    function slotAt(row, col) {
+      return slots.find((s) => Number(s.dataset.row) === row && Number(s.dataset.col) === col);
+    }
+
+    function renderBoard() {
+      controlToggle.classList.toggle('active', st.controlMode);
+      inputs.forEach((inp, i) => { inp.textContent = String(st.input[i]); });
+
+      slots.forEach((slot) => {
+        slot.classList.remove('drag');
+        slot.innerHTML = '';
+      });
+
+      for (let col = 0; col < MOMENTS; col += 1) {
+        const m = st.moments[col];
+
+        if (m.cx) {
+          const top = Math.min(m.cx.control, m.cx.target);
+          const bottom = Math.max(m.cx.control, m.cx.target);
+          const topSlot = slotAt(top, col);
+          const bottomSlot = slotAt(bottom, col);
+          const controlSlot = slotAt(m.cx.control, col);
+          const targetSlot = slotAt(m.cx.target, col);
+
+          if (topSlot && bottomSlot && controlSlot && targetSlot) {
+            const link = document.createElement('div');
+            link.className = 'cnot-link';
+            link.style.top = '8px';
+            link.style.height = `${(bottom - top) * 70 + 10}px`;
+            topSlot.appendChild(link);
+
+            const dot = document.createElement('div');
+            dot.className = 'cnot-dot';
+            dot.draggable = true;
+            dot.addEventListener('dragstart', (ev) => encode(ev, { type: 'CX', fromCol: col }));
+            dot.addEventListener('dblclick', () => { st.moments[col].cx = null; renderAll(); });
+            controlSlot.appendChild(dot);
+
+            const target = document.createElement('div');
+            target.className = 'cnot-target';
+            target.textContent = 'X';
+            target.draggable = true;
+            target.addEventListener('dragstart', (ev) => encode(ev, { type: 'CX', fromCol: col }));
+            target.addEventListener('dblclick', () => { st.moments[col].cx = null; renderAll(); });
+            targetSlot.appendChild(target);
+          }
+        }
+
+        for (let row = 0; row < NUM_QUBITS; row += 1) {
+          const g = m.singles[row];
+          if (!g) continue;
+          const slot = slotAt(row, col);
+          if (!slot) continue;
+          const n = createPlaced(g);
+          n.addEventListener('dragstart', (ev) => encode(ev, { type: g, fromCol: col, fromRow: row }));
+          n.addEventListener('dblclick', () => {
+            st.moments[col].singles[row] = null;
+            renderAll();
+          });
+          slot.appendChild(n);
+        }
+      }
+    }
+
+    function renderAll() {
+      renderBoard();
+      renderReport();
+    }
+
+    function clearFromSource(payload) {
+      if (payload.fromCol === undefined || payload.fromCol === null) return;
+      const c = Number(payload.fromCol);
+      if (payload.type === 'H' || payload.type === 'X' || payload.type === 'T') {
+        st.moments[c].singles[payload.fromRow] = null;
+      }
+      if (payload.type === 'CX') {
+        st.moments[c].cx = null;
+      }
+    }
+
+    paletteGates.forEach((gate) => {
+      gate.addEventListener('dragstart', (ev) => {
+        encode(ev, { type: gate.dataset.gate, fromCol: null });
+      });
+    });
+
+    slots.forEach((slot) => {
+      slot.addEventListener('dragover', (ev) => {
+        ev.preventDefault();
+        slot.classList.add('drag');
+      });
+
+      slot.addEventListener('dragleave', () => slot.classList.remove('drag'));
+
+      slot.addEventListener('drop', (ev) => {
+        ev.preventDefault();
+        slots.forEach((s) => s.classList.remove('drag'));
+        const payload = decode(ev);
+        if (!payload) return;
+
+        const row = Number(slot.dataset.row);
+        const col = Number(slot.dataset.col);
+        const isSingle = payload.type === 'H' || payload.type === 'X' || payload.type === 'T';
+        const isCX = payload.type === 'CX' || (payload.type === 'X' && st.controlMode);
+        if (!isSingle && !isCX) return;
+
+        clearFromSource(payload);
+
+        if (isCX) {
+          const target = Math.min(row + 1, NUM_QUBITS - 1);
+          if (target === row) {
+            renderAll();
+            return;
+          }
+          st.moments[col].singles.fill(null);
+          st.moments[col].cx = { control: row, target };
+        } else {
+          st.moments[col].cx = null;
+          st.moments[col].singles[row] = payload.type;
+        }
+
+        renderAll();
+      });
+    });
+
+    inputs.forEach((inp, i) => {
+      inp.addEventListener('click', () => {
+        st.input[i] = st.input[i] ? 0 : 1;
+        renderAll();
+      });
+    });
+
+    controlToggle.addEventListener('click', () => {
+      st.controlMode = !st.controlMode;
+      renderBoard();
+    });
+
+    measureBtn.addEventListener('click', () => {
+      renderReport();
+    });
+
+    resetBtn.addEventListener('click', () => {
+      st.input = Array(NUM_QUBITS).fill(0);
+      st.moments = Array.from({ length: MOMENTS }, () => ({ singles: Array(NUM_QUBITS).fill(null), cx: null }));
+      st.controlMode = false;
+      renderAll();
+    });
+
+    renderAll();
+  </script>
+</body>
+
+</html>

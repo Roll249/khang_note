@@ -1,0 +1,515 @@
+<!doctype html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Foundations09 - Entangled</title>
+  <style>
+    :root {
+      --bg: #f4f6fa;
+      --card: #fff;
+      --line: #dbe2ef;
+      --muted: #98a6bc;
+      --text: #344154;
+      --gate: #596579;
+      --accent: #8f6161;
+      --shadow: 0 8px 20px rgba(35, 52, 84, 0.14);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Inter, "Segoe UI", Roboto, Arial, sans-serif;
+      padding: 18px;
+    }
+
+    .wrap {
+      max-width: 980px;
+      margin: 0 auto;
+      display: grid;
+      gap: 12px;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+      padding: 14px;
+    }
+
+    .palette {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .gate {
+      width: 62px;
+      height: 62px;
+      border-radius: 8px;
+      background: var(--gate);
+      color: #fff;
+      display: grid;
+      place-items: center;
+      font-size: 34px;
+      font-weight: 700;
+      user-select: none;
+      cursor: grab;
+      box-shadow: var(--shadow);
+    }
+
+    .gate.cx {
+      font-size: 22px;
+      letter-spacing: 0.5px;
+    }
+
+    .gate.identity { font-size: 36px; }
+
+    .toolbar {
+      display: flex;
+      width: fit-content;
+      border: 1px solid var(--line);
+      border-bottom: 0;
+      border-radius: 10px 10px 0 0;
+      overflow: hidden;
+      background: #fff;
+    }
+
+    .tool {
+      width: 70px;
+      height: 54px;
+      display: grid;
+      place-items: center;
+      border-right: 1px solid var(--line);
+      color: #66758a;
+      font-size: 23px;
+      user-select: none;
+      background: #fff;
+    }
+
+    .tool:last-child { border-right: 0; }
+    .tool.dim { opacity: 0.35; }
+
+    .board-wrap {
+      border: 1px solid var(--line);
+      border-radius: 0 10px 10px 10px;
+      overflow-x: auto;
+      background: #fff;
+    }
+
+    .board {
+      min-width: 860px;
+      display: grid;
+      grid-template-columns: 86px 140px repeat(5, 1fr);
+      grid-auto-rows: 76px;
+      position: relative;
+    }
+
+    .wire {
+      position: absolute;
+      left: 226px;
+      right: 12px;
+      height: 2px;
+      background: #8799b8;
+      z-index: 0;
+    }
+
+    .wire.w1 { top: 113px; }
+    .wire.w2 { top: 189px; }
+
+    .cell {
+      border-right: 1px solid #edf1f7;
+      border-bottom: 1px solid #edf1f7;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #fff;
+      color: var(--muted);
+      font-size: 28px;
+      font-weight: 700;
+      z-index: 1;
+    }
+
+    .cell.label {
+      justify-content: flex-start;
+      padding-left: 18px;
+      font-size: 36px;
+    }
+
+    .cell.input {
+      cursor: pointer;
+      font-size: 40px;
+    }
+
+    .slot {
+      width: 100%;
+      height: 100%;
+      border-radius: 10px;
+      display: grid;
+      place-items: center;
+      position: relative;
+      z-index: 2;
+    }
+
+    .slot.drag {
+      outline: 2px dashed #9cb3df;
+      outline-offset: -5px;
+      background: #eef4ff;
+    }
+
+    .placed {
+      width: 64px;
+      height: 64px;
+      border-radius: 8px;
+      background: var(--gate);
+      color: #fff;
+      display: grid;
+      place-items: center;
+      font-size: 40px;
+      font-weight: 700;
+      cursor: grab;
+      user-select: none;
+    }
+
+    .placed.identity {
+      background: #e7ecf4;
+      color: #7f8da4;
+      border: 2px dashed #b9c7dc;
+      font-size: 34px;
+    }
+
+    .cnot-dot {
+      width: 14px;
+      height: 14px;
+      border-radius: 999px;
+      background: #253040;
+      position: absolute;
+      top: 7px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 4;
+      cursor: grab;
+    }
+
+    .cnot-link {
+      position: absolute;
+      width: 2px;
+      height: 52px;
+      background: #243145;
+      top: 12px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 3;
+      pointer-events: none;
+    }
+
+    .cnot-target {
+      width: 64px;
+      height: 64px;
+      border-radius: 999px;
+      background: var(--gate);
+      color: #fff;
+      display: grid;
+      place-items: center;
+      font-size: 44px;
+      font-weight: 700;
+      user-select: none;
+      cursor: grab;
+      z-index: 4;
+    }
+
+    .report {
+      margin-top: 10px;
+      background: #f0f1f5;
+      border: 1px solid #e0e4ec;
+      border-radius: 10px;
+      padding: 12px 14px;
+      font-family: "Cascadia Mono", Consolas, "Courier New", monospace;
+      font-size: 35px;
+      line-height: 1.18;
+      color: var(--accent);
+      white-space: pre;
+    }
+
+    @media (max-width: 900px) {
+      .report { font-size: 26px; }
+      .cell.label { font-size: 30px; }
+      .cell.input { font-size: 32px; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <section class="card">
+      <div class="palette">
+        <div class="gate" draggable="true" data-gate="H" title="Hadamard">H</div>
+        <div class="gate" draggable="true" data-gate="X" title="Pauli X">X</div>
+        <div class="gate identity" draggable="true" data-gate="*" title="Danh tính">*</div>
+        <div class="gate cx" draggable="true" data-gate="CX" title="Controlled X">CX</div>
+      </div>
+
+      <div class="toolbar">
+        <div class="tool">🔓</div><div class="tool dim">⟲</div><div class="tool dim">⟳</div><div class="tool dim">C</div><div class="tool dim">S</div>
+      </div>
+      <div class="board-wrap">
+        <div class="board" id="board">
+          <div class="wire w1"></div><div class="wire w2"></div>
+
+          <div class="cell">↘</div><div class="cell"></div><div class="cell">1</div><div class="cell">2</div><div class="cell">3</div><div class="cell">4</div><div class="cell">5</div>
+
+          <div class="cell input" data-input="0">0</div><div class="cell label">Số 1</div>
+          <div class="cell"><div class="slot" data-row="0" data-col="0"></div></div>
+          <div class="cell"><div class="slot" data-row="0" data-col="1"></div></div>
+          <div class="cell"><div class="slot" data-row="0" data-col="2"></div></div>
+          <div class="cell"><div class="slot" data-row="0" data-col="3"></div></div>
+          <div class="cell"><div class="slot" data-row="0" data-col="4"></div></div>
+
+          <div class="cell input" data-input="1">0</div><div class="cell label">Số 2</div>
+          <div class="cell"><div class="slot" data-row="1" data-col="0"></div></div>
+          <div class="cell"><div class="slot" data-row="1" data-col="1"></div></div>
+          <div class="cell"><div class="slot" data-row="1" data-col="2"></div></div>
+          <div class="cell"><div class="slot" data-row="1" data-col="3"></div></div>
+          <div class="cell"><div class="slot" data-row="1" data-col="4"></div></div>
+        </div>
+      </div>
+
+      <pre class="report" id="report"></pre>
+    </section>
+  </div>
+
+  <script>
+    const SQRT2 = Math.sqrt(2);
+    const SHOTS = 1000;
+
+    const board = document.getElementById('board');
+    const slots = [...board.querySelectorAll('.slot')];
+    const inputs = [...board.querySelectorAll('.cell.input')];
+    const paletteGates = [...document.querySelectorAll('.palette .gate')];
+    const report = document.getElementById('report');
+
+    const st = {
+      input: [0, 0],
+      timeline: Array.from({ length: 5 }, () => ({ q0: null, q1: null, cx: false }))
+    };
+
+    function encode(ev, payload) {
+      const text = JSON.stringify(payload);
+      ev.dataTransfer.setData('text/plain', text);
+      ev.dataTransfer.effectAllowed = 'move';
+      window.__dragPayload = payload;
+    }
+
+    function decode(ev) {
+      const raw = ev.dataTransfer.getData('text/plain');
+      if (!raw) return window.__dragPayload || null;
+      try { return JSON.parse(raw); } catch { return window.__dragPayload || null; }
+    }
+
+    function applySingleQubit(stateVec, qubit, gate) {
+      if (gate === '*') return [...stateVec];
+
+      if (gate === 'X') {
+        const out = [0, 0, 0, 0];
+        for (let base = 0; base < 4; base += 1) {
+          const pair = base ^ (1 << (1 - qubit));
+          out[pair] += stateVec[base];
+        }
+        return out;
+      }
+
+      if (gate === 'H') {
+        const out = [0, 0, 0, 0];
+        for (let base = 0; base < 4; base += 1) {
+          const bit = (base >> (1 - qubit)) & 1;
+          const pair = bit ? base & ~(1 << (1 - qubit)) : base | (1 << (1 - qubit));
+          if (bit === 0) {
+            out[base] += stateVec[base] / SQRT2;
+            out[pair] += stateVec[base] / SQRT2;
+          } else {
+            out[pair] += stateVec[base] / SQRT2;
+            out[base] -= stateVec[base] / SQRT2;
+          }
+        }
+        return out;
+      }
+
+      return stateVec;
+    }
+
+    function applyCNOT(stateVec) {
+      const out = [0, 0, 0, 0];
+      out[0] = stateVec[0];
+      out[1] = stateVec[1];
+      out[2] = stateVec[3];
+      out[3] = stateVec[2];
+      return out;
+    }
+
+    function probabilities() {
+      let vec = [0, 0, 0, 0];
+      const idx = st.input[0] * 2 + st.input[1];
+      vec[idx] = 1;
+
+      for (let col = 0; col < st.timeline.length; col += 1) {
+        const op = st.timeline[col];
+        if (op.cx) vec = applyCNOT(vec);
+        if (op.q0) vec = applySingleQubit(vec, 0, op.q0);
+        if (op.q1) vec = applySingleQubit(vec, 1, op.q1);
+      }
+
+      return vec.map((amp) => amp * amp);
+    }
+
+    function bars(prob) {
+      const full = Math.round(prob * 21);
+      const pct = Math.round(prob * 100);
+      const count = Math.round(prob * SHOTS);
+      return { bar: `${'█'.repeat(full)}${'░'.repeat(21 - full)}`, pct, count };
+    }
+
+    function renderReport() {
+      const probs = probabilities();
+      const labels = ['|00⟩', '|01⟩', '|10⟩', '|11⟩'];
+      report.textContent = labels.map((label, i) => {
+        const b = bars(probs[i]);
+        const chance = i === 3 ? 'khả năng' : 'cơ hội';
+        return `${i + 1} ${label} ${b.bar} ${String(b.pct).padStart(3, ' ')}% ${chance}`;
+      }).join('\n');
+    }
+
+    function createPlaced(symbol) {
+      const node = document.createElement('div');
+      node.className = 'placed';
+      node.textContent = symbol;
+      if (symbol === '*') node.classList.add('identity');
+      node.draggable = true;
+      return node;
+    }
+
+    function renderBoard() {
+      inputs.forEach((inp, i) => { inp.textContent = String(st.input[i]); });
+      slots.forEach((slot) => {
+        slot.classList.remove('drag');
+        slot.innerHTML = '';
+      });
+
+      for (let col = 0; col < st.timeline.length; col += 1) {
+        const op = st.timeline[col];
+        const slotQ0 = slots.find((s) => Number(s.dataset.row) === 0 && Number(s.dataset.col) === col);
+        const slotQ1 = slots.find((s) => Number(s.dataset.row) === 1 && Number(s.dataset.col) === col);
+
+        if (op.cx && slotQ0 && slotQ1) {
+          const link = document.createElement('div');
+          link.className = 'cnot-link';
+          slotQ0.appendChild(link);
+
+          const dot = document.createElement('div');
+          dot.className = 'cnot-dot';
+          dot.draggable = true;
+          dot.addEventListener('dragstart', (ev) => encode(ev, { type: 'CX', fromCol: col }));
+          dot.addEventListener('dblclick', () => { st.timeline[col].cx = false; renderAll(); });
+          slotQ0.appendChild(dot);
+
+          const target = document.createElement('div');
+          target.className = 'cnot-target';
+          target.textContent = 'X';
+          target.draggable = true;
+          target.addEventListener('dragstart', (ev) => encode(ev, { type: 'CX', fromCol: col }));
+          target.addEventListener('dblclick', () => { st.timeline[col].cx = false; renderAll(); });
+          slotQ1.appendChild(target);
+        }
+
+        if (op.q0 && slotQ0) {
+          const n = createPlaced(op.q0);
+          n.addEventListener('dragstart', (ev) => encode(ev, { type: op.q0, fromCol: col, fromRow: 0 }));
+          n.addEventListener('dblclick', () => { st.timeline[col].q0 = null; renderAll(); });
+          slotQ0.appendChild(n);
+        }
+
+        if (op.q1 && slotQ1) {
+          const n = createPlaced(op.q1);
+          n.addEventListener('dragstart', (ev) => encode(ev, { type: op.q1, fromCol: col, fromRow: 1 }));
+          n.addEventListener('dblclick', () => { st.timeline[col].q1 = null; renderAll(); });
+          slotQ1.appendChild(n);
+        }
+      }
+    }
+
+    function renderAll() {
+      renderBoard();
+      renderReport();
+    }
+
+    function clearFromSource(payload) {
+      if (payload.fromCol === undefined || payload.fromCol === null) return;
+      const c = Number(payload.fromCol);
+      if (payload.type === 'H' || payload.type === 'X' || payload.type === '*') {
+        st.timeline[c][payload.fromRow === 1 ? 'q1' : 'q0'] = null;
+      }
+      if (payload.type === 'CX') {
+        st.timeline[c].cx = false;
+      }
+    }
+
+    paletteGates.forEach((gate) => {
+      gate.addEventListener('dragstart', (ev) => {
+        encode(ev, { type: gate.dataset.gate, fromCol: null });
+      });
+    });
+
+    slots.forEach((slot) => {
+      slot.addEventListener('dragover', (ev) => {
+        ev.preventDefault();
+        slot.classList.add('drag');
+      });
+
+      slot.addEventListener('dragleave', () => slot.classList.remove('drag'));
+
+      slot.addEventListener('drop', (ev) => {
+        ev.preventDefault();
+        slots.forEach((s) => s.classList.remove('drag'));
+        const payload = decode(ev);
+        if (!payload) return;
+
+        const row = Number(slot.dataset.row);
+        const col = Number(slot.dataset.col);
+
+        const isSingle = payload.type === 'H' || payload.type === 'X' || payload.type === '*';
+        const isCx = payload.type === 'CX';
+        if (!isSingle && !isCx) return;
+
+        clearFromSource(payload);
+
+        if (isSingle) {
+          st.timeline[col].cx = false;
+          st.timeline[col][row === 0 ? 'q0' : 'q1'] = payload.type;
+        }
+
+        if (isCx) {
+          st.timeline[col].cx = true;
+          st.timeline[col].q0 = null;
+          st.timeline[col].q1 = null;
+        }
+
+        renderAll();
+      });
+    });
+
+    inputs.forEach((inp, i) => {
+      inp.addEventListener('click', () => {
+        st.input[i] = st.input[i] ? 0 : 1;
+        renderAll();
+      });
+    });
+
+    renderAll();
+  </script>
+</body>
+
+</html>

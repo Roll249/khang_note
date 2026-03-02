@@ -1,0 +1,745 @@
+<!doctype html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Foundations05b - Applying Hadamard Twice</title>
+    <style>
+        :root {
+            --bg: #f3f5f8;
+            --card: #ffffff;
+            --line: #dbe2ef;
+            --ink: #3b4554;
+            --muted: #a8b2c1;
+            --gate: #4d5867;
+            --wire: #8ea0bb;
+            --accent: #a66f71;
+            --shadow: 0 8px 20px rgba(35, 52, 84, 0.14);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            background: var(--bg);
+            color: var(--ink);
+            font-family: Inter, "Segoe UI", Roboto, Arial, sans-serif;
+            padding: 18px;
+        }
+
+        .container {
+            max-width: 960px;
+            margin: 0 auto;
+        }
+
+        .Q-circuit-palette {
+            display: flex;
+            gap: 14px;
+            margin-bottom: 14px;
+        }
+
+        .Q-circuit-operation {
+            width: 74px;
+            height: 74px;
+            display: grid;
+            place-items: center;
+            cursor: grab;
+            user-select: none;
+        }
+
+        .Q-circuit-operation-tile {
+            width: 74px;
+            height: 74px;
+            border-radius: 8px;
+            background: var(--gate);
+            color: #fff;
+            display: grid;
+            place-items: center;
+            font-size: 44px;
+            font-weight: 700;
+            box-shadow: var(--shadow);
+        }
+
+        .Q-circuit {
+            background: var(--card);
+            border-radius: 12px;
+            border: 1px solid var(--line);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+
+        .Q-circuit-toolbar {
+            display: flex;
+            width: fit-content;
+            border-bottom: 1px solid var(--line);
+            border-right: 1px solid var(--line);
+        }
+
+        .Q-circuit-button {
+            width: 84px;
+            height: 64px;
+            border-right: 1px solid var(--line);
+            display: grid;
+            place-items: center;
+            color: #5e6b7f;
+            font-size: 30px;
+            user-select: none;
+            cursor: pointer;
+            background: #fff;
+        }
+
+        .Q-circuit-button:last-child {
+            border-right: 0;
+        }
+
+        .Q-circuit-button[q-disabled="true"],
+        .Q-circuit-button[q-disabled="Q-disabled"] {
+            opacity: 0.4;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+
+        .Q-circuit-board-container {
+            overflow-x: auto;
+            border-top: 1px solid var(--line);
+        }
+
+        .Q-circuit-board {
+            min-width: 860px;
+            display: grid;
+            grid-template-columns: 96px 138px repeat(5, 1fr) 50px;
+            grid-auto-rows: 92px;
+            position: relative;
+            background: #fff;
+        }
+
+        .Q-circuit-register-wire {
+            position: absolute;
+            left: 234px;
+            right: 48px;
+            top: 137px;
+            height: 2px;
+            background: var(--wire);
+            z-index: 0;
+        }
+
+        .Q-circuit-header {
+            border-right: 1px solid #edf1f7;
+            border-bottom: 1px solid #edf1f7;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--muted);
+            font-weight: 700;
+            font-size: 36px;
+            background: #fff;
+            z-index: 1;
+        }
+
+        .Q-circuit-register-label {
+            justify-content: flex-start;
+            padding-left: 26px;
+            font-size: 36px;
+            letter-spacing: 0.4px;
+        }
+
+        .Q-circuit-input {
+            cursor: pointer;
+            font-size: 48px;
+        }
+
+        .Q-circuit-moment-label {
+            font-size: 40px;
+        }
+
+        .Q-circuit-moment-add,
+        .Q-circuit-register-add {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .moment-slot {
+            border-right: 1px solid #edf1f7;
+            border-bottom: 1px solid #edf1f7;
+            display: grid;
+            place-items: center;
+            z-index: 2;
+            position: relative;
+            background: transparent;
+        }
+
+        .moment-slot.drag-over {
+            background: #f0f5ff;
+            outline: 2px dashed #9cb2de;
+            outline-offset: -8px;
+        }
+
+        .moment-slot .Q-circuit-operation {
+            width: auto;
+            height: auto;
+        }
+
+        .moment-slot .Q-circuit-operation-tile {
+            width: 78px;
+            height: 78px;
+        }
+
+        h5 {
+            margin: 24px 0 8px;
+            font-size: 44px;
+            color: #313944;
+        }
+
+        p {
+            margin: 0 0 12px;
+            font-size: 22px;
+            line-height: 1.55;
+            color: #525f73;
+            max-width: 900px;
+        }
+
+        pre {
+            margin: 0;
+            background: #f0f1f5;
+            border: 1px solid #e0e4ec;
+            border-radius: 12px;
+            padding: 16px 18px;
+            overflow-x: auto;
+        }
+
+        .canvas-wrap {
+            margin-top: 18px;
+            border: 1px solid #e0e4ec;
+            border-radius: 12px;
+            background: #fff;
+            box-shadow: var(--shadow);
+            padding: 8px 12px 14px;
+        }
+
+        .bloch-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 14px;
+        }
+
+        .state-canvas {
+            background: #fff;
+            border-radius: 8px;
+        }
+
+        .bloch-side {
+            display: grid;
+            gap: 10px;
+            align-content: center;
+            margin-right: 10px;
+        }
+
+        .bloch-op-btn {
+            width: 48px;
+            height: 48px;
+            border: 0;
+            border-radius: 6px;
+            background: var(--gate);
+            color: #fff;
+            font-size: 34px;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: var(--shadow);
+            line-height: 1;
+        }
+
+        .bloch-reset {
+            margin-left: 34px;
+            margin-top: 4px;
+            border: 0;
+            background: transparent;
+            color: #1f2630;
+            font-size: 40px;
+            cursor: pointer;
+            padding: 0;
+        }
+
+        samp {
+            font-family: "Cascadia Mono", "Consolas", "Courier New", monospace;
+            font-size: 36px;
+            line-height: 1.35;
+            color: var(--accent);
+            white-space: pre;
+        }
+
+        .hint {
+            margin-top: 10px;
+            font-size: 17px;
+            color: #6b7891;
+        }
+
+        @media (max-width: 860px) {
+            h5 {
+                font-size: 34px;
+            }
+
+            p {
+                font-size: 18px;
+            }
+
+            samp {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="Q-circuit-palette" data-gates="HX">
+            <div class="Q-circuit-operation Q-circuit-operation-hadamard" gate-symbol="H" title="Hadamard"
+                draggable="true">
+                <div class="Q-circuit-operation-tile">H</div>
+            </div>
+            <div class="Q-circuit-operation Q-circuit-operation-pauli-x" gate-symbol="X" title="Pauli X"
+                draggable="true">
+                <div class="Q-circuit-operation-tile">X</div>
+            </div>
+        </div>
+
+        <div id="circuit-1">
+            <div class="Q-circuit" id="circuit-1-2">
+                <div class="Q-circuit-toolbar">
+                    <div class="Q-circuit-button Q-circuit-toggle Q-circuit-toggle-lock" id="lock-btn"
+                        title="Khóa/mở khóa">🔓</div>
+                    <div class="Q-circuit-button Q-circuit-button-undo" id="undo-btn" title="Hoàn tác">⟲</div>
+                    <div class="Q-circuit-button Q-circuit-button-redo" id="redo-btn" title="Làm lại"
+                        q-disabled="Q-disabled">⟳</div>
+                    <div class="Q-circuit-button Q-circuit-toggle Q-circuit-toggle-control"
+                        title="Tạo hoạt động được kiểm soát" q-disabled="true">C</div>
+                    <div class="Q-circuit-button Q-circuit-toggle-swap" title="Tạo thao tác hoán đổi" q-disabled="true">
+                        S</div>
+                </div>
+
+                <div class="Q-circuit-board-container">
+                    <div class="Q-circuit-board">
+                        <div class="Q-circuit-register-wire"></div>
+
+                        <div class="Q-circuit-header Q-circuit-selectall" title="Chọn tất cả"
+                            style="grid-row-start:1;grid-column-start:1;">↘</div>
+                        <div class="Q-circuit-header" style="grid-row-start:1;grid-column-start:2;"></div>
+
+                        <div class="Q-circuit-header Q-circuit-moment-label"
+                            style="grid-row-start:1;grid-column-start:3;">1</div>
+                        <div class="Q-circuit-header Q-circuit-moment-label"
+                            style="grid-row-start:1;grid-column-start:4;">2</div>
+                        <div class="Q-circuit-header Q-circuit-moment-label"
+                            style="grid-row-start:1;grid-column-start:5;">3</div>
+                        <div class="Q-circuit-header Q-circuit-moment-label"
+                            style="grid-row-start:1;grid-column-start:6;">4</div>
+                        <div class="Q-circuit-header Q-circuit-moment-label"
+                            style="grid-row-start:1;grid-column-start:7;">5</div>
+                        <div class="Q-circuit-header Q-circuit-moment-add"
+                            style="grid-row-start:1;grid-column-start:8;">+</div>
+
+                        <div class="Q-circuit-header Q-circuit-input" id="input-cell"
+                            title="Giá trị khởi đầu của Qubit #1" style="grid-row-start:2;grid-column-start:1;">0</div>
+                        <div class="Q-circuit-header Q-circuit-register-label"
+                            style="grid-row-start:2;grid-column-start:2;">Số 1</div>
+
+                        <div class="moment-slot" data-slot="0" style="grid-row-start:2;grid-column-start:3;"></div>
+                        <div class="moment-slot" data-slot="1" style="grid-row-start:2;grid-column-start:4;"></div>
+                        <div class="moment-slot" data-slot="2" style="grid-row-start:2;grid-column-start:5;"></div>
+                        <div class="moment-slot" data-slot="3" style="grid-row-start:2;grid-column-start:6;"></div>
+                        <div class="moment-slot" data-slot="4" style="grid-row-start:2;grid-column-start:7;"></div>
+
+                        <div class="Q-circuit-header Q-circuit-register-add"
+                            style="grid-row-start:3;grid-column-start:2;">+</div>
+                    </div>
+                </div>
+
+                <p class="hint">Double-click lên cổng trong mạch để xoá.</p>
+            </div>
+        </div>
+
+        <h5>Số đo của tôi</h5>
+        <p>Lần này bạn không cần tự mình thực hiện các phép đo. Ngay khi bạn thay đổi mạch điện, hệ thống sẽ đánh giá và
+            cập nhật số liệu thống kê tương ứng. Sau 1000 phép đo, chúng ta thu được phân bố như sau:</p>
+
+        <pre><samp id="circuit-1-report" for="circuit2"></samp></pre>
+
+        <div class="canvas-wrap">
+            <div class="bloch-row">
+                <canvas id="state-canvas" class="state-canvas" width="460" height="460" tabindex="0"
+                    style="width: 320px; height: 320px;"></canvas>
+                <div class="bloch-side">
+                    <button type="button" class="bloch-op-btn" id="bloch-x-btn">X</button>
+                    <button type="button" class="bloch-op-btn" id="bloch-h-btn">H</button>
+                </div>
+            </div>
+            <button type="button" class="bloch-reset" id="bloch-reset-btn">Reset</button>
+        </div>
+    </div>
+
+    <script>
+        const SHOTS = 1000;
+        const sqrtHalf = Math.SQRT1_2;
+
+        const paletteOps = [...document.querySelectorAll('.Q-circuit-palette .Q-circuit-operation')];
+        const slots = [...document.querySelectorAll('.moment-slot')];
+        const inputCell = document.getElementById('input-cell');
+        const report = document.getElementById('circuit-1-report');
+        const lockBtn = document.getElementById('lock-btn');
+        const undoBtn = document.getElementById('undo-btn');
+        const redoBtn = document.getElementById('redo-btn');
+        const stateCanvas = document.getElementById('state-canvas');
+        const stateCtx = stateCanvas.getContext('2d');
+        const blochXBtn = document.getElementById('bloch-x-btn');
+        const blochHBtn = document.getElementById('bloch-h-btn');
+        const blochResetBtn = document.getElementById('bloch-reset-btn');
+
+        const state = {
+            locked: false,
+            input: 0,
+            timeline: ['H', 'H', null, null, null],
+            undoStack: [],
+            redoStack: []
+        };
+
+        const bloch = {
+            a0: 1,
+            a1: 0
+        };
+
+        function snapshot() {
+            return {
+                locked: state.locked,
+                input: state.input,
+                timeline: [...state.timeline]
+            };
+        }
+
+        function restore(snap) {
+            state.locked = snap.locked;
+            state.input = snap.input;
+            state.timeline = [...snap.timeline];
+            renderAll();
+        }
+
+        function pushUndo() {
+            state.undoStack.push(snapshot());
+            if (state.undoStack.length > 80) state.undoStack.shift();
+            state.redoStack = [];
+            renderToolbar();
+        }
+
+        function createPlacedGate(type) {
+            const op = document.createElement('div');
+            op.className = `Q-circuit-operation ${type === 'H' ? 'Q-circuit-operation-hadamard' : 'Q-circuit-operation-pauli-x'}`;
+            op.setAttribute('gate-symbol', type);
+            op.title = type === 'H' ? 'Hadamard' : 'Pauli X';
+            op.draggable = true;
+
+            const tile = document.createElement('div');
+            tile.className = 'Q-circuit-operation-tile';
+            tile.textContent = type;
+            op.appendChild(tile);
+
+            op.addEventListener('dragstart', (event) => {
+                if (state.locked) {
+                    event.preventDefault();
+                    return;
+                }
+                const fromSlot = op.parentElement?.dataset.slot;
+                event.dataTransfer.setData('application/json', JSON.stringify({ type, fromSlot }));
+            });
+
+            op.addEventListener('dblclick', () => {
+                if (state.locked) return;
+                const holder = op.parentElement;
+                if (!holder || holder.dataset.slot === undefined) return;
+                pushUndo();
+                state.timeline[Number(holder.dataset.slot)] = null;
+                renderAll();
+            });
+
+            return op;
+        }
+
+        function applyGate(a0, a1, gate) {
+            if (gate === 'X') return [a1, a0];
+            if (gate === 'H') return [(a0 + a1) * sqrtHalf, (a0 - a1) * sqrtHalf];
+            return [a0, a1];
+        }
+
+        function probabilities() {
+            let a0 = state.input === 0 ? 1 : 0;
+            let a1 = state.input === 1 ? 1 : 0;
+            for (const gate of state.timeline) {
+                [a0, a1] = applyGate(a0, a1, gate);
+            }
+            const p0 = Math.max(0, Math.min(1, a0 * a0));
+            const p1 = Math.max(0, Math.min(1, a1 * a1));
+            return { p0, p1, a0, a1 };
+        }
+
+        function theoreticalDistribution() {
+            const { p0, p1 } = probabilities();
+            let zeros = Math.round(p0 * SHOTS);
+            zeros = Math.max(0, Math.min(SHOTS, zeros));
+            const ones = SHOTS - zeros;
+            return { zeros, ones, p0, p1 };
+        }
+
+        function bar(count) {
+            const full = Math.round((count / SHOTS) * 20);
+            return `${'█'.repeat(full)}${'░'.repeat(20 - full)}`;
+        }
+
+        function renderReport() {
+            const { zeros, ones } = theoreticalDistribution();
+            const p0 = Math.round((zeros / SHOTS) * 100);
+            const p1 = 100 - p0;
+            report.textContent =
+                `1 |0⟩ ${bar(zeros)} ${String(p0).padStart(3, ' ')}% cơ hội\n2 |1⟩ ${bar(ones)} ${String(p1).padStart(3, ' ')}% cơ hội`;
+        }
+
+        function drawArrow(x1, y1, x2, y2, color, width = 4, head = 12) {
+            stateCtx.beginPath();
+            stateCtx.moveTo(x1, y1);
+            stateCtx.lineTo(x2, y2);
+            stateCtx.strokeStyle = color;
+            stateCtx.lineWidth = width;
+            stateCtx.lineCap = 'round';
+            stateCtx.stroke();
+
+            const angle = Math.atan2(y2 - y1, x2 - x1);
+            stateCtx.beginPath();
+            stateCtx.moveTo(x2, y2);
+            stateCtx.lineTo(x2 - head * Math.cos(angle - Math.PI / 7), y2 - head * Math.sin(angle - Math.PI / 7));
+            stateCtx.lineTo(x2 - head * Math.cos(angle + Math.PI / 7), y2 - head * Math.sin(angle + Math.PI / 7));
+            stateCtx.closePath();
+            stateCtx.fillStyle = color;
+            stateCtx.fill();
+        }
+
+        function project(vx, vy, vz, radius, centerX, centerY) {
+            const px = centerX + (vy - vx) * 0.78 * radius;
+            const py = centerY + (vx + vy) * 0.28 * radius - vz * 0.95 * radius;
+            return { x: px, y: py };
+        }
+
+        function normalizeBloch() {
+            const length = Math.hypot(bloch.a0, bloch.a1) || 1;
+            bloch.a0 /= length;
+            bloch.a1 /= length;
+        }
+
+        function applyBlochGate(type) {
+            [bloch.a0, bloch.a1] = applyGate(bloch.a0, bloch.a1, type);
+            normalizeBloch();
+            drawStateCanvas();
+        }
+
+        function drawStateCanvas() {
+            const a0 = bloch.a0;
+            const a1 = bloch.a1;
+            const p0 = a0 * a0;
+            const p1 = a1 * a1;
+            const centerX = stateCanvas.width / 2;
+            const centerY = stateCanvas.height / 2;
+            const radius = 150;
+
+            const x = 2 * a0 * a1;
+            const z = p0 - p1;
+            const y = 0;
+
+            stateCtx.clearRect(0, 0, stateCanvas.width, stateCanvas.height);
+
+            const grad = stateCtx.createRadialGradient(centerX - 40, centerY - 70, 25, centerX, centerY, radius + 80);
+            grad.addColorStop(0, '#f2f2f2');
+            grad.addColorStop(1, '#d3d3d3');
+            stateCtx.fillStyle = grad;
+            stateCtx.fillRect(0, 0, stateCanvas.width, stateCanvas.height);
+
+            stateCtx.beginPath();
+            stateCtx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+            stateCtx.fillStyle = 'rgba(220,220,220,0.64)';
+            stateCtx.fill();
+            stateCtx.lineWidth = 2;
+            stateCtx.strokeStyle = '#9ea4ad';
+            stateCtx.stroke();
+
+            stateCtx.strokeStyle = 'rgba(120,120,120,0.45)';
+            stateCtx.lineWidth = 2;
+            stateCtx.beginPath();
+            stateCtx.ellipse(centerX, centerY, radius * 0.42, radius, 0, 0, Math.PI * 2);
+            stateCtx.stroke();
+
+            stateCtx.beginPath();
+            stateCtx.ellipse(centerX + radius * 0.2, centerY, radius * 0.48, radius * 0.95, Math.PI / 8, 0, Math.PI * 2);
+            stateCtx.stroke();
+
+            stateCtx.beginPath();
+            stateCtx.ellipse(centerX, centerY + radius * 0.12, radius, radius * 0.48, 0, 0, Math.PI * 2);
+            stateCtx.setLineDash([8, 10]);
+            stateCtx.strokeStyle = '#6d6d6d';
+            stateCtx.lineWidth = 2;
+            stateCtx.stroke();
+            stateCtx.setLineDash([]);
+
+            const axisX = project(1.08, 0, 0, radius, centerX, centerY);
+            const axisY = project(0, 1.08, 0, radius, centerX, centerY);
+            const axisZ = project(0, 0, 1.2, radius, centerX, centerY);
+            const axisZDown = project(0, 0, -1.05, radius, centerX, centerY);
+
+            drawArrow(centerX, centerY, axisX.x, axisX.y, '#555555', 3, 14);
+            drawArrow(centerX, centerY, axisY.x, axisY.y, '#555555', 3, 14);
+            drawArrow(centerX, centerY, axisZ.x, axisZ.y, '#111111', 4, 16);
+
+            stateCtx.beginPath();
+            stateCtx.moveTo(centerX, centerY);
+            stateCtx.lineTo(axisZDown.x, axisZDown.y);
+            stateCtx.strokeStyle = '#777777';
+            stateCtx.lineWidth = 2;
+            stateCtx.stroke();
+
+            const tip = project(x, y, z, radius, centerX, centerY);
+            drawArrow(centerX, centerY, tip.x, tip.y, '#58c697', 6, 15);
+
+            stateCtx.fillStyle = '#505050';
+            stateCtx.font = 'italic 42px Inter, Segoe UI, Arial';
+            stateCtx.fillText('x', axisX.x - 22, axisX.y + 26);
+            stateCtx.fillText('y', axisY.x + 10, axisY.y + 12);
+
+            stateCtx.font = '700 42px Inter, Segoe UI, Arial';
+            stateCtx.fillText('z', axisZ.x - 8, axisZ.y - 10);
+
+            stateCtx.font = '500 34px Inter, Segoe UI, Arial';
+            stateCtx.fillText('|0⟩', centerX + 8, centerY - radius - 2);
+            stateCtx.fillText('|1⟩', centerX - 10, centerY + radius + 22);
+
+            stateCtx.font = '600 18px Inter, Segoe UI, Arial';
+            stateCtx.fillStyle = '#4a5568';
+            stateCtx.fillText(`P(|0⟩)=${(p0 * 100).toFixed(1)}%`, 16, 26);
+            stateCtx.fillText(`P(|1⟩)=${(p1 * 100).toFixed(1)}%`, 16, 50);
+        }
+
+        function renderBoard() {
+            inputCell.textContent = String(state.input);
+            slots.forEach((slot, idx) => {
+                slot.innerHTML = '';
+                const gate = state.timeline[idx];
+                if (gate) slot.appendChild(createPlacedGate(gate));
+            });
+        }
+
+        function renderToolbar() {
+            lockBtn.textContent = state.locked ? '🔒' : '🔓';
+            undoBtn.setAttribute('q-disabled', state.undoStack.length ? 'false' : 'Q-disabled');
+            redoBtn.setAttribute('q-disabled', state.redoStack.length ? 'false' : 'Q-disabled');
+        }
+
+        function renderAll() {
+            renderBoard();
+            renderToolbar();
+            renderReport();
+            drawStateCanvas();
+        }
+
+        function placeGate(target, type, fromSlot) {
+            if (state.locked) return;
+            if (!type) return;
+
+            pushUndo();
+            const targetIndex = Number(target);
+            if (fromSlot !== null && fromSlot !== undefined && fromSlot !== '') {
+                const oldIndex = Number(fromSlot);
+                if (oldIndex !== targetIndex) {
+                    state.timeline[oldIndex] = null;
+                }
+            }
+            state.timeline[targetIndex] = type;
+            renderAll();
+        }
+
+        paletteOps.forEach((op) => {
+            op.addEventListener('dragstart', (event) => {
+                if (state.locked) {
+                    event.preventDefault();
+                    return;
+                }
+                const type = op.getAttribute('gate-symbol');
+                event.dataTransfer.setData('application/json', JSON.stringify({ type, fromSlot: null }));
+            });
+        });
+
+        slots.forEach((slot) => {
+            slot.addEventListener('dragover', (event) => {
+                if (state.locked) return;
+                event.preventDefault();
+                slot.classList.add('drag-over');
+            });
+
+            slot.addEventListener('dragleave', () => {
+                slot.classList.remove('drag-over');
+            });
+
+            slot.addEventListener('drop', (event) => {
+                slot.classList.remove('drag-over');
+                if (state.locked) return;
+                event.preventDefault();
+                let payload;
+                try {
+                    payload = JSON.parse(event.dataTransfer.getData('application/json'));
+                } catch {
+                    return;
+                }
+                placeGate(slot.dataset.slot, payload.type, payload.fromSlot);
+            });
+        });
+
+        inputCell.addEventListener('click', () => {
+            if (state.locked) return;
+            pushUndo();
+            state.input = state.input ? 0 : 1;
+            renderAll();
+        });
+
+        lockBtn.addEventListener('click', () => {
+            state.locked = !state.locked;
+            renderToolbar();
+        });
+
+        undoBtn.addEventListener('click', () => {
+            if (!state.undoStack.length) return;
+            state.redoStack.push(snapshot());
+            const previous = state.undoStack.pop();
+            restore(previous);
+        });
+
+        redoBtn.addEventListener('click', () => {
+            if (!state.redoStack.length) return;
+            state.undoStack.push(snapshot());
+            const next = state.redoStack.pop();
+            restore(next);
+        });
+
+        blochXBtn.addEventListener('click', () => {
+            applyBlochGate('X');
+        });
+
+        blochHBtn.addEventListener('click', () => {
+            applyBlochGate('H');
+        });
+
+        blochResetBtn.addEventListener('click', () => {
+            bloch.a0 = 1;
+            bloch.a1 = 0;
+            drawStateCanvas();
+        });
+
+        renderAll();
+    </script>
+</body>
+
+</html>
