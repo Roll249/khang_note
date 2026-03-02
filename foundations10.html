@@ -18,7 +18,9 @@
       --active: #4f83f1;
     }
 
-    * { box-sizing: border-box; }
+    * {
+      box-sizing: border-box;
+    }
 
     body {
       margin: 0;
@@ -98,9 +100,18 @@
       background: #fff;
     }
 
-    .tool:last-child { border-right: 0; }
-    .tool.dim { opacity: 0.35; }
-    .tool.clickable { cursor: pointer; }
+    .tool:last-child {
+      border-right: 0;
+    }
+
+    .tool.dim {
+      opacity: 0.35;
+    }
+
+    .tool.clickable {
+      cursor: pointer;
+    }
+
     .tool.active {
       color: #fff;
       background: var(--active);
@@ -130,11 +141,25 @@
       z-index: 0;
     }
 
-    .wire.w1 { top: 104px; }
-    .wire.w2 { top: 174px; }
-    .wire.w3 { top: 244px; }
-    .wire.w4 { top: 314px; }
-    .wire.w5 { top: 384px; }
+    .wire.w1 {
+      top: 104px;
+    }
+
+    .wire.w2 {
+      top: 174px;
+    }
+
+    .wire.w3 {
+      top: 244px;
+    }
+
+    .wire.w4 {
+      top: 314px;
+    }
+
+    .wire.w5 {
+      top: 384px;
+    }
 
     .cell {
       border-right: 1px solid #edf1f7;
@@ -279,7 +304,8 @@
   <div class="wrap">
     <section class="card">
       <h1>A 5-qubit quantum computer</h1>
-      <p class="lead">Create a GHZ (Greenberger, Horne and Zeilinger) state for 5 qubits! How many gates do we need at least to create this state?</p>
+      <p class="lead">Create a GHZ (Greenberger, Horne and Zeilinger) state for 5 qubits! How many gates do we need at
+        least to create this state?</p>
 
       <div class="palette">
         <div class="gate" draggable="true" data-gate="H" title="Hadamard">H</div>
@@ -297,44 +323,109 @@
 
       <div class="board-wrap">
         <div class="board" id="board">
-          <div class="wire w1"></div><div class="wire w2"></div><div class="wire w3"></div><div class="wire w4"></div><div class="wire w5"></div>
+          <div class="wire w1"></div>
+          <div class="wire w2"></div>
+          <div class="wire w3"></div>
+          <div class="wire w4"></div>
+          <div class="wire w5"></div>
 
-          <div class="cell">↘</div><div class="cell"></div><div class="cell">1</div><div class="cell">2</div><div class="cell">3</div><div class="cell">4</div><div class="cell">5</div>
+          <div class="cell">↘</div>
+          <div class="cell"></div>
+          <div class="cell">1</div>
+          <div class="cell">2</div>
+          <div class="cell">3</div>
+          <div class="cell">4</div>
+          <div class="cell">5</div>
 
-          <div class="cell input" data-input="0">0</div><div class="cell label">Nr. 1</div>
-          <div class="cell"><div class="slot" data-row="0" data-col="0"></div></div>
-          <div class="cell"><div class="slot" data-row="0" data-col="1"></div></div>
-          <div class="cell"><div class="slot" data-row="0" data-col="2"></div></div>
-          <div class="cell"><div class="slot" data-row="0" data-col="3"></div></div>
-          <div class="cell"><div class="slot" data-row="0" data-col="4"></div></div>
+          <div class="cell input" data-input="0">0</div>
+          <div class="cell label">Nr. 1</div>
+          <div class="cell">
+            <div class="slot" data-row="0" data-col="0"></div>
+          </div>
+          <div class="cell">
+            <div class="slot" data-row="0" data-col="1"></div>
+          </div>
+          <div class="cell">
+            <div class="slot" data-row="0" data-col="2"></div>
+          </div>
+          <div class="cell">
+            <div class="slot" data-row="0" data-col="3"></div>
+          </div>
+          <div class="cell">
+            <div class="slot" data-row="0" data-col="4"></div>
+          </div>
 
-          <div class="cell input" data-input="1">0</div><div class="cell label">Nr. 2</div>
-          <div class="cell"><div class="slot" data-row="1" data-col="0"></div></div>
-          <div class="cell"><div class="slot" data-row="1" data-col="1"></div></div>
-          <div class="cell"><div class="slot" data-row="1" data-col="2"></div></div>
-          <div class="cell"><div class="slot" data-row="1" data-col="3"></div></div>
-          <div class="cell"><div class="slot" data-row="1" data-col="4"></div></div>
+          <div class="cell input" data-input="1">0</div>
+          <div class="cell label">Nr. 2</div>
+          <div class="cell">
+            <div class="slot" data-row="1" data-col="0"></div>
+          </div>
+          <div class="cell">
+            <div class="slot" data-row="1" data-col="1"></div>
+          </div>
+          <div class="cell">
+            <div class="slot" data-row="1" data-col="2"></div>
+          </div>
+          <div class="cell">
+            <div class="slot" data-row="1" data-col="3"></div>
+          </div>
+          <div class="cell">
+            <div class="slot" data-row="1" data-col="4"></div>
+          </div>
 
-          <div class="cell input" data-input="2">0</div><div class="cell label">Nr. 3</div>
-          <div class="cell"><div class="slot" data-row="2" data-col="0"></div></div>
-          <div class="cell"><div class="slot" data-row="2" data-col="1"></div></div>
-          <div class="cell"><div class="slot" data-row="2" data-col="2"></div></div>
-          <div class="cell"><div class="slot" data-row="2" data-col="3"></div></div>
-          <div class="cell"><div class="slot" data-row="2" data-col="4"></div></div>
+          <div class="cell input" data-input="2">0</div>
+          <div class="cell label">Nr. 3</div>
+          <div class="cell">
+            <div class="slot" data-row="2" data-col="0"></div>
+          </div>
+          <div class="cell">
+            <div class="slot" data-row="2" data-col="1"></div>
+          </div>
+          <div class="cell">
+            <div class="slot" data-row="2" data-col="2"></div>
+          </div>
+          <div class="cell">
+            <div class="slot" data-row="2" data-col="3"></div>
+          </div>
+          <div class="cell">
+            <div class="slot" data-row="2" data-col="4"></div>
+          </div>
 
-          <div class="cell input" data-input="3">0</div><div class="cell label">Nr. 4</div>
-          <div class="cell"><div class="slot" data-row="3" data-col="0"></div></div>
-          <div class="cell"><div class="slot" data-row="3" data-col="1"></div></div>
-          <div class="cell"><div class="slot" data-row="3" data-col="2"></div></div>
-          <div class="cell"><div class="slot" data-row="3" data-col="3"></div></div>
-          <div class="cell"><div class="slot" data-row="3" data-col="4"></div></div>
+          <div class="cell input" data-input="3">0</div>
+          <div class="cell label">Nr. 4</div>
+          <div class="cell">
+            <div class="slot" data-row="3" data-col="0"></div>
+          </div>
+          <div class="cell">
+            <div class="slot" data-row="3" data-col="1"></div>
+          </div>
+          <div class="cell">
+            <div class="slot" data-row="3" data-col="2"></div>
+          </div>
+          <div class="cell">
+            <div class="slot" data-row="3" data-col="3"></div>
+          </div>
+          <div class="cell">
+            <div class="slot" data-row="3" data-col="4"></div>
+          </div>
 
-          <div class="cell input" data-input="4">0</div><div class="cell label">Nr. 5</div>
-          <div class="cell"><div class="slot" data-row="4" data-col="0"></div></div>
-          <div class="cell"><div class="slot" data-row="4" data-col="1"></div></div>
-          <div class="cell"><div class="slot" data-row="4" data-col="2"></div></div>
-          <div class="cell"><div class="slot" data-row="4" data-col="3"></div></div>
-          <div class="cell"><div class="slot" data-row="4" data-col="4"></div></div>
+          <div class="cell input" data-input="4">0</div>
+          <div class="cell label">Nr. 5</div>
+          <div class="cell">
+            <div class="slot" data-row="4" data-col="0"></div>
+          </div>
+          <div class="cell">
+            <div class="slot" data-row="4" data-col="1"></div>
+          </div>
+          <div class="cell">
+            <div class="slot" data-row="4" data-col="2"></div>
+          </div>
+          <div class="cell">
+            <div class="slot" data-row="4" data-col="3"></div>
+          </div>
+          <div class="cell">
+            <div class="slot" data-row="4" data-col="4"></div>
+          </div>
         </div>
       </div>
 
@@ -347,7 +438,8 @@
       <p class="lead" style="margin-bottom:6px">After 1000 measurements we get the following distribution:</p>
       <pre class="report" id="report"></pre>
 
-      <div class="quiz">How many gates do we need at least to create this GHZ state? A:3 &nbsp; B:4 &nbsp; C:5 &nbsp; D:6</div>
+      <div class="quiz">How many gates do we need at least to create this GHZ state? A:3 &nbsp; B:4 &nbsp; C:5 &nbsp;
+        D:6</div>
     </section>
   </div>
 

@@ -262,7 +262,8 @@
         </div>
 
         <div class="section">
-            <p class="intro">Kết hợp cả <span class="chip">H</span><span class="chip">X</span><span class="chip">T</span> trong cùng một applet:</p>
+            <p class="intro">Kết hợp cả <span class="chip">H</span><span class="chip">X</span><span
+                    class="chip">T</span> trong cùng một applet:</p>
             <iframe width="100%" height="320px"
                 src="https://www.iqmacademy.com/curriculum/assets/bloch-viz/index.html?gates=H,X,T&amp;noKet&amp;showPlusMinus"></iframe>
         </div>
@@ -271,10 +272,12 @@
 
         <div class="section">
             <div class="Q-circuit-palette" data-gates="HXT">
-                <div class="Q-circuit-operation Q-circuit-operation-hadamard" gate-symbol="H" title="Hadamard" draggable="true">
+                <div class="Q-circuit-operation Q-circuit-operation-hadamard" gate-symbol="H" title="Hadamard"
+                    draggable="true">
                     <div class="Q-circuit-operation-tile">H</div>
                 </div>
-                <div class="Q-circuit-operation Q-circuit-operation-pauli-x" gate-symbol="X" title="Pauli X" draggable="true">
+                <div class="Q-circuit-operation Q-circuit-operation-pauli-x" gate-symbol="X" title="Pauli X"
+                    draggable="true">
                     <div class="Q-circuit-operation-tile">X</div>
                 </div>
                 <div class="Q-circuit-operation Q-circuit-operation-pi8" gate-symbol="T" title="π ÷ 8" draggable="true">
@@ -288,7 +291,8 @@
                         <div class="Q-circuit-button" id="lock2" title="Lock / unlock">🔓</div>
                         <div class="Q-circuit-button" id="undo2" title="Undo" q-disabled="Q-disabled">⟲</div>
                         <div class="Q-circuit-button" id="redo2" title="Redo" q-disabled="Q-disabled">⟳</div>
-                        <div class="Q-circuit-button" title="Create controlled operation" q-disabled="Q-disabled">C</div>
+                        <div class="Q-circuit-button" title="Create controlled operation" q-disabled="Q-disabled">C
+                        </div>
                         <div class="Q-circuit-button" title="Create swap operation" q-disabled="Q-disabled">S</div>
                     </div>
 
@@ -298,15 +302,23 @@
 
                             <div class="Q-circuit-header" style="grid-row-start:1;grid-column-start:1;">↘</div>
                             <div class="Q-circuit-header" style="grid-row-start:1;grid-column-start:2;"></div>
-                            <div class="Q-circuit-header Q-circuit-moment-label" style="grid-row-start:1;grid-column-start:3;">1</div>
-                            <div class="Q-circuit-header Q-circuit-moment-label" style="grid-row-start:1;grid-column-start:4;">2</div>
-                            <div class="Q-circuit-header Q-circuit-moment-label" style="grid-row-start:1;grid-column-start:5;">3</div>
-                            <div class="Q-circuit-header Q-circuit-moment-label" style="grid-row-start:1;grid-column-start:6;">4</div>
-                            <div class="Q-circuit-header Q-circuit-moment-label" style="grid-row-start:1;grid-column-start:7;">5</div>
-                            <div class="Q-circuit-header Q-circuit-moment-add" style="grid-row-start:1;grid-column-start:8;">+</div>
+                            <div class="Q-circuit-header Q-circuit-moment-label"
+                                style="grid-row-start:1;grid-column-start:3;">1</div>
+                            <div class="Q-circuit-header Q-circuit-moment-label"
+                                style="grid-row-start:1;grid-column-start:4;">2</div>
+                            <div class="Q-circuit-header Q-circuit-moment-label"
+                                style="grid-row-start:1;grid-column-start:5;">3</div>
+                            <div class="Q-circuit-header Q-circuit-moment-label"
+                                style="grid-row-start:1;grid-column-start:6;">4</div>
+                            <div class="Q-circuit-header Q-circuit-moment-label"
+                                style="grid-row-start:1;grid-column-start:7;">5</div>
+                            <div class="Q-circuit-header Q-circuit-moment-add"
+                                style="grid-row-start:1;grid-column-start:8;">+</div>
 
-                            <div class="Q-circuit-header Q-circuit-input" id="input2" style="grid-row-start:2;grid-column-start:1;">0</div>
-                            <div class="Q-circuit-header Q-circuit-register-label" style="grid-row-start:2;grid-column-start:2;">Nr. 1</div>
+                            <div class="Q-circuit-header Q-circuit-input" id="input2"
+                                style="grid-row-start:2;grid-column-start:1;">0</div>
+                            <div class="Q-circuit-header Q-circuit-register-label"
+                                style="grid-row-start:2;grid-column-start:2;">Nr. 1</div>
 
                             <div class="moment-slot" data-slot="0" style="grid-row-start:2;grid-column-start:3;"></div>
                             <div class="moment-slot" data-slot="1" style="grid-row-start:2;grid-column-start:4;"></div>
@@ -314,7 +326,8 @@
                             <div class="moment-slot" data-slot="3" style="grid-row-start:2;grid-column-start:6;"></div>
                             <div class="moment-slot" data-slot="4" style="grid-row-start:2;grid-column-start:7;"></div>
 
-                            <div class="Q-circuit-header Q-circuit-register-add" style="grid-row-start:3;grid-column-start:2;">+</div>
+                            <div class="Q-circuit-header Q-circuit-register-add"
+                                style="grid-row-start:3;grid-column-start:2;">+</div>
                         </div>
                     </div>
 
@@ -435,7 +448,7 @@
             const p0 = Math.round((zero / SHOTS2) * 100);
             const p1 = 100 - p0;
             report2.textContent =
-`1  |0⟩  ${bar2(zero)} ${String(p0).padStart(3, ' ')}% chance\n2  |1⟩  ${bar2(one)} ${String(p1).padStart(3, ' ')}% chance`;
+                `1  |0⟩  ${bar2(zero)} ${String(p0).padStart(3, ' ')}% chance\n2  |1⟩  ${bar2(one)} ${String(p1).padStart(3, ' ')}% chance`;
         }
 
         function makeGate2(type) {
